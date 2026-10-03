@@ -4,7 +4,7 @@
 
 (function () {
   // Version Guard: Otomatis membersihkan cache localStorage jika versi aplikasi diperbarui, tapi pertahankan kredensial Supabase & sesi user
-  const APP_VERSION = '2026.10.03.v21';
+  const APP_VERSION = '2026.10.03.v22';
   if (localStorage.getItem('sitama_app_version') !== APP_VERSION) {
     const savedSbUrl = localStorage.getItem('sitama_supabase_url');
     const savedSbKey = localStorage.getItem('sitama_supabase_anon_key');
@@ -2792,6 +2792,12 @@
             </div>
           ` : ''}
 
+          ${state.recoverySuccessMsg ? `
+            <div style="background:#ECFDF5; border:1px solid #10B981; color:#065F46; padding:10px 14px; border-radius:8px; font-size:0.82rem; margin-bottom:16px; text-align:left;">
+              ${state.recoverySuccessMsg}
+            </div>
+          ` : ''}
+
           <!-- TAB 1: LOGIN (MATCHING GAMBAR 1) -->
           ${state.authTab === 'login' ? `
             <form onsubmit="handleLoginSubmit(event)">
@@ -2807,6 +2813,7 @@
 
               <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.82rem; margin-bottom:18px;">
                 <label style="display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" checked/> ${t('rememberMe')}</label>
+                <a href="javascript:void(0)" onclick="openForgotPasswordModal()" style="color:var(--primary-blue); font-weight:600; text-decoration:none; cursor:pointer;">Lupa Sandi?</a>
               </div>
 
               <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; font-size:1rem; margin-bottom:18px;">
@@ -2906,6 +2913,79 @@
   /* ------------------- MODAL DIALOGS ------------------- */
   function renderActiveModalHTML() {
     if (!state.activeModal) return '';
+
+    if (state.activeModal === 'forgot_password') {
+      return `
+        <div class="modal-backdrop" onclick="closeModal(event)">
+          <div class="modal-content" style="max-width:460px;" onclick="event.stopPropagation()">
+            <div class="modal-header">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:1.2rem;">🔑</span>
+                <h3 style="margin:0; font-size:1.15rem; font-weight:800; color:var(--primary-dark);">Lupa Kata Sandi</h3>
+              </div>
+              <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+
+            ${!state.recoveryOtpGenerated ? `
+              <form onsubmit="handleForgotPasswordRequest(event)">
+                <div class="modal-body">
+                  <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:16px; line-height:1.5;">
+                    Masukkan email atau username Anda yang terdaftar di SMKN Wonosalam. Sistem akan mengirimkan 6 digit kode OTP pemulihan kata sandi ke Gmail Anda.
+                  </p>
+
+                  ${state.recoveryErrorMsg ? `
+                    <div style="background:#FEF2F2; border:1px solid #FCA5A5; color:#991B1B; padding:10px 12px; border-radius:6px; font-size:0.82rem; margin-bottom:14px;">
+                      ⚠️ ${escapeHtml(state.recoveryErrorMsg)}
+                    </div>
+                  ` : ''}
+
+                  <div class="form-group">
+                    <label style="font-weight:700; font-size:0.85rem;">Email atau Username Terdaftar</label>
+                    <input type="text" class="form-control" id="forgotInput" placeholder="Contoh: guru_atp atau email akun Anda..." value="${escapeHtml(state.prefilledForgotUser || '')}" required />
+                  </div>
+                </div>
+                <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:8px;">
+                  <button type="button" class="btn btn-outline" onclick="closeModal()">Batal</button>
+                  <button type="submit" class="btn btn-primary">Kirim Kode OTP ke Email</button>
+                </div>
+              </form>
+            ` : `
+              <form onsubmit="handleResetPasswordSubmit(event)">
+                <div class="modal-body">
+                  <div style="background:#EFF6FF; border:1px solid #BFDBFE; border-left:4px solid #2563EB; padding:12px 14px; border-radius:8px; margin-bottom:16px; font-size:0.82rem; color:#1E40AF; line-height:1.5;">
+                    <div style="font-weight:700; margin-bottom:4px;">✉️ Kode OTP Terkirim ke Gmail!</div>
+                    Sistem telah mengirimkan 6 digit kode verifikasi ke: <b>${escapeHtml(state.recoveryUser ? state.recoveryUser.email : '')}</b>. Periksa Kotak Masuk atau folder Spam email Anda.
+                  </div>
+
+                  <div class="form-group">
+                    <label style="font-weight:700; font-size:0.85rem;">Kode OTP Verifikasi (6 Digit)</label>
+                    <input type="text" class="form-control" id="inputOtp" placeholder="Contoh: 849201" required style="letter-spacing:2px; font-weight:700; text-align:center; font-size:1.1rem;" />
+                  </div>
+
+                  <div class="grid-2">
+                    <div class="form-group">
+                      <label style="font-weight:700; font-size:0.85rem;">Kata Sandi Baru</label>
+                      <input type="password" class="form-control" id="inputNewPass" placeholder="Minimal 6 karakter" required />
+                    </div>
+                    <div class="form-group">
+                      <label style="font-weight:700; font-size:0.85rem;">Konfirmasi Sandi Baru</label>
+                      <input type="password" class="form-control" id="inputNewPassConfirm" placeholder="Ulangi kata sandi" required />
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center;">
+                  <button type="button" class="btn btn-outline btn-sm" onclick="handleResetOtpState()">← Ubah Email</button>
+                  <div style="display:flex; gap:8px;">
+                    <button type="button" class="btn btn-outline" onclick="closeModal()">Batal</button>
+                    <button type="submit" class="btn btn-success">Simpan Sandi Baru</button>
+                  </div>
+                </div>
+              </form>
+            `}
+          </div>
+        </div>
+      `;
+    }
 
     if (state.activeModal === 'supabase_config') {
       const isConnected = window.SitamaDB && window.SitamaDB.isCloudConnected();
@@ -3240,6 +3320,19 @@
     renderApp();
   };
 
+  window.openForgotPasswordModal = function () {
+    const loginEl = document.getElementById('loginUser');
+    if (loginEl && loginEl.value && loginEl.value.trim()) {
+      state.prefilledForgotUser = loginEl.value.trim();
+    }
+    state.recoveryOtpGenerated = '';
+    state.recoveryUser = null;
+    state.recoveryErrorMsg = '';
+    state.recoverySuccessMsg = '';
+    state.activeModal = 'forgot_password';
+    renderApp();
+  };
+
   window.handleResetOtpState = function () {
     state.recoveryOtpGenerated = '';
     state.recoveryUser = null;
@@ -3530,10 +3623,13 @@
       }
     }
 
+    state.activeModal = null;
     state.authTab = 'login';
     state.recoveryOtpGenerated = '';
     state.recoveryUser = null;
-    state.recoverySuccessMsg = 'Kata sandi berhasil diperbarui! Silakan masuk kembali.';
+    state.recoverySuccessMsg = 'Kata sandi berhasil diperbarui! Silakan masuk dengan kata sandi baru Anda.';
+    state.loginPresetUser = userInDb ? (userInDb.username || userInDb.email) : '';
+    alert('Kata sandi berhasil diperbarui! Silakan masuk dengan kata sandi baru Anda.');
     renderApp();
   };
 
