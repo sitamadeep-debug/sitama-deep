@@ -4,7 +4,7 @@
 
 (function () {
   // Version Guard: Otomatis membersihkan cache localStorage jika versi aplikasi diperbarui, tapi pertahankan kredensial Supabase & sesi user
-  const APP_VERSION = '2026.10.03.v15';
+  const APP_VERSION = '2026.10.03.v16';
   if (localStorage.getItem('sitama_app_version') !== APP_VERSION) {
     const savedSbUrl = localStorage.getItem('sitama_supabase_url');
     const savedSbKey = localStorage.getItem('sitama_supabase_anon_key');
@@ -189,12 +189,6 @@
         </div>
 
         <div class="header-actions">
-          <!-- Cloud Supabase Status Pill -->
-          <button class="cloud-status-pill ${window.SitamaDB && window.SitamaDB.isCloudConnected() ? 'connected' : 'offline'}" onclick="openSupabaseModal()" title="Status Koneksi Cloud Database Supabase">
-            <span class="cloud-status-dot"></span>
-            <span>${window.SitamaDB && window.SitamaDB.isCloudConnected() ? '☁️ Supabase: Aktif' : '☁️ Supabase: Lokal'}</span>
-          </button>
-
           <!-- Quick Role Switcher Pill for 4 Account Levels -->
           <div class="role-pill">
             <span>${t('switchRole')}:</span>
