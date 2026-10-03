@@ -4,7 +4,7 @@
 
 (function () {
   // Version Guard: Otomatis membersihkan cache localStorage jika versi aplikasi diperbarui
-  const APP_VERSION = '2026.10.03.v9';
+  const APP_VERSION = '2026.10.03.v11';
   if (localStorage.getItem('sitama_app_version') !== APP_VERSION) {
     localStorage.clear();
     localStorage.setItem('sitama_app_version', APP_VERSION);
@@ -1824,6 +1824,7 @@
 
           <ul class="landing-nav-links">
             <li><a onclick="scrollToLandingTop()">${isEn ? 'Home' : 'Beranda'}</a></li>
+            <li><a onclick="scrollToLandingSection('galeri-section')">${isEn ? 'Campus Gallery' : 'Galeri Kampus'}</a></li>
             <li><a onclick="scrollToLandingSection('deep-learning-section')">Deep Learning</a></li>
             <li><a onclick="scrollToLandingSection('ekosistem-section')">${isEn ? '4 Roles' : '4 Akun'}</a></li>
             <li><a onclick="scrollToLandingSection('rubrik-section')">${isEn ? 'Rubric 47' : 'Rubrik 47'}</a></li>
@@ -1850,67 +1851,84 @@
           </div>
         </header>
 
-        <!-- 2. HERO SECTION -->
-        <section class="landing-hero" id="hero">
-          <div class="landing-hero-left">
-            <div class="landing-pill">
-              <span>🏅</span>
-              <span>${isEn ? 'GEMPITA 2026 Best Practice Innovation • Cabdin Jombang' : 'Inovasi Praktik Baik GEMPITA 2026 • Cabdin Jombang'}</span>
-            </div>
-
-            <h1 class="landing-hero-title">
-              ${isEn 
-                ? 'Standardized Teaching Module Review Based on <span class="landing-gradient-text">Deep Learning</span>' 
-                : 'Sistem Informasi Telaah Modul Ajar Berbasis <span class="landing-gradient-text">Pembelajaran Mendalam</span>'}
-            </h1>
-
-            <p class="landing-hero-desc">
-              ${isEn
-                ? 'Digital quality assurance platform for instructional planning at SMK Negeri Wonosalam. Connecting Principals, Curriculum Coordinators, Vocational Teachers, and Administrative Staff with 47 standardized Deep Learning indicators (Mindful, Meaningful, Joyful).'
-                : 'Platform digital penjaminan mutu perencanaan pembelajaran di SMK Negeri Wonosalam. Menghubungkan Kepala Sekolah, Waka Kurikulum, Guru Pengampu Kejuruan, dan Tenaga Kependidikan dalam ekosistem telaah terstandar 47 Indikator Deep Learning (Mindful, Meaningful, Joyful).'}
-            </p>
-
-            <div class="landing-cta-row">
-              <button class="landing-btn landing-btn-primary" onclick="navigateTo('login')">
-                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"></line></svg>
-                ${isEn ? 'Open Official Portal / Login' : 'Masuk ke Aplikasi Portal'}
-              </button>
-
-              <button class="landing-btn landing-btn-secondary" onclick="navigateTo('dashboard')">
-                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                ${isEn ? 'Explore Live Dashboard' : 'Eksplorasi Demo Dashboard'}
-              </button>
-
-              <button class="landing-btn landing-btn-outline" onclick="scrollToLandingSection('rubrik-section')">
-                📋 ${isEn ? '47 Indicators' : 'Lihat 47 Indikator'}
-              </button>
-            </div>
-
-            <!-- Quick Demo Role Launcher Chips -->
-            <div class="landing-quick-roles">
-              <div class="landing-quick-roles-label">
-                ⚡ ${isEn ? 'Instant Demo - Click to enter as any role:' : 'Uji coba langsung tanpa instalasi (Pilih salah satu peran):'}
+        <!-- 2. HERO SECTION WITH AUTHENTIC SCHOOL PHOTO BACKGROUND -->
+        <div class="landing-hero-container">
+          <section class="landing-hero" id="hero">
+            <div class="landing-hero-left">
+              <div class="landing-pill">
+                <span>🏅</span>
+                <span>${isEn ? 'GEMPITA 2026 Best Practice Innovation • Cabdin Jombang' : 'Inovasi Praktik Baik GEMPITA 2026 • Cabdin Jombang'}</span>
               </div>
-              <div class="landing-chips-container">
-                <button class="landing-role-chip" onclick="quickLogin('USR-002')">👔 2. Kepsek (Sudarso, S.Pd.)</button>
-                <button class="landing-role-chip" onclick="quickLogin('USR-002B')">👔 2. Waka (Drs. Bambang)</button>
-                <button class="landing-role-chip" onclick="quickLogin('USR-003')">👨‍🏫 3. Guru ATP (Budi)</button>
-                <button class="landing-role-chip" onclick="quickLogin('USR-004')">🍳 3. Guru Kuliner (Dewi)</button>
-                <button class="landing-role-chip" onclick="quickLogin('USR-008')">📋 4. Tendik / TU (Tri)</button>
-                <button class="landing-role-chip" onclick="quickLogin('USR-001')">🛠️ 1. Admin (Siti)</button>
-              </div>
-            </div>
-          </div>
 
-          <!-- Hero Right Preview Card -->
-          <div class="landing-hero-card">
-            <div class="landing-card-header">
-              <div class="landing-card-title">
-                <svg width="18" height="18" fill="none" stroke="#38BDF8" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                Hasil Telaah Modul Ajar (Live)
+              <!-- Main Building Interactive Photo Pill -->
+              <div class="landing-building-pill" onclick="openPhotoModal('gedung-utama-smkn.jpg', 'Gedung Utama SMK Negeri Wonosalam', 'Panorama megah Gedung Utama dan Lapangan Upacara SMK Negeri Wonosalam berlatar Gunung Anjasmoro di Wonosalam, Jombang, Jawa Timur.', 'Gedung Utama & Kampus')" title="Klik untuk melihat foto Gedung Utama SMKN Wonosalam">
+                <span class="landing-pulse-badge"></span>
+                <span>🏛️ <b>Gedung Utama & Kampus SMKN Wonosalam</b> (Lereng Gn. Anjasmoro)</span>
+                <span class="landing-view-hint">Foto HD ↗</span>
               </div>
-              <span class="landing-status-badge">✓ SANGAT LAYAK (A)</span>
+
+              <h1 class="landing-hero-title">
+                ${isEn 
+                  ? 'Standardized Teaching Module Review Based on <span class="landing-gradient-text">Deep Learning</span>' 
+                  : 'Sistem Informasi Telaah Modul Ajar Berbasis <span class="landing-gradient-text">Pembelajaran Mendalam</span>'}
+              </h1>
+
+              <p class="landing-hero-desc">
+                ${isEn
+                  ? 'Digital quality assurance platform for instructional planning at SMK Negeri Wonosalam. Connecting Principals, Curriculum Coordinators, Vocational Teachers, and Administrative Staff with 47 standardized Deep Learning indicators (Mindful, Meaningful, Joyful).'
+                  : 'Platform digital penjaminan mutu perencanaan pembelajaran di SMK Negeri Wonosalam. Menghubungkan Kepala Sekolah, Waka Kurikulum, Guru Pengampu Kejuruan, dan Tenaga Kependidikan dalam ekosistem telaah terstandar 47 Indikator Deep Learning (Mindful, Meaningful, Joyful).'}
+              </p>
+
+              <div class="landing-cta-row">
+                <button class="landing-btn landing-btn-primary" onclick="navigateTo('login')">
+                  <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+                  ${isEn ? 'Open Official Portal / Login' : 'Masuk ke Aplikasi Portal'}
+                </button>
+
+                <button class="landing-btn landing-btn-secondary" onclick="navigateTo('dashboard')">
+                  <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                  ${isEn ? 'Explore Live Dashboard' : 'Eksplorasi Demo Dashboard'}
+                </button>
+
+                <button class="landing-btn landing-btn-outline" onclick="scrollToLandingSection('galeri-section')">
+                  📸 ${isEn ? 'Campus Gallery' : 'Galeri Kampus'}
+                </button>
+              </div>
+
+              <!-- Quick Demo Role Launcher Chips -->
+              <div class="landing-quick-roles">
+                <div class="landing-quick-roles-label">
+                  ⚡ ${isEn ? 'Instant Demo - Click to enter as any role:' : 'Uji coba langsung tanpa instalasi (Pilih salah satu peran):'}
+                </div>
+                <div class="landing-chips-container">
+                  <button class="landing-role-chip" onclick="quickLogin('USR-002')">👔 2. Kepsek (Sudarso, S.Pd.)</button>
+                  <button class="landing-role-chip" onclick="quickLogin('USR-002B')">👔 2. Waka (Drs. Bambang)</button>
+                  <button class="landing-role-chip" onclick="quickLogin('USR-003')">👨‍🏫 3. Guru ATP (Budi)</button>
+                  <button class="landing-role-chip" onclick="quickLogin('USR-004')">🍳 3. Guru Kuliner (Dewi)</button>
+                  <button class="landing-role-chip" onclick="quickLogin('USR-008')">📋 4. Tendik / TU (Tri)</button>
+                  <button class="landing-role-chip" onclick="quickLogin('USR-001')">🛠️ 1. Admin (Siti)</button>
+                </div>
+              </div>
             </div>
+
+            <!-- Hero Right Preview Card -->
+            <div class="landing-hero-card">
+              <!-- Campus Building Preview Thumbnail Card -->
+              <div class="landing-card-campus-thumb" onclick="openPhotoModal('gedung-utama-smkn.jpg', 'Gedung Utama SMK Negeri Wonosalam', 'Panorama megah Gedung Utama dan Lingkungan Belajar SMK Negeri Wonosalam berlatar Gunung Anjasmoro di Wonosalam, Jombang, Jawa Timur.', 'Gedung Utama & Kampus')" title="Klik untuk memperbesar foto Gedung Utama">
+                <img src="gedung-utama-smkn.jpg" alt="Gedung Utama SMK Negeri Wonosalam" />
+                <div class="landing-thumb-caption">
+                  <span>🏛️ Kampus Utama SMKN Wonosalam</span>
+                  <span>Buka Foto HD 🔍</span>
+                </div>
+              </div>
+
+              <div class="landing-card-header">
+                <div class="landing-card-title">
+                  <svg width="18" height="18" fill="none" stroke="#38BDF8" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  Hasil Telaah Modul Ajar (Live)
+                </div>
+                <span class="landing-status-badge">✓ SANGAT LAYAK (A)</span>
+              </div>
 
             <div style="font-size:0.88rem; color:#FFFFFF; font-weight:700; margin-bottom:4px;">
               Pengolahan Tanah & Penanaman Kelapa Sawit
@@ -1955,34 +1973,266 @@
             </button>
           </div>
         </section>
+      </div>
 
-        <!-- 3. STATS COUNTER RIBBON -->
-        <section class="landing-stats-section">
-          <div class="landing-stats-grid">
-            <div class="landing-stat-box">
-              <div class="landing-stat-number">47</div>
-              <div class="landing-stat-title">Indikator Telaah Baku</div>
-              <div class="landing-stat-desc">Rubrik terpadu Deep Learning</div>
+      <!-- 3. STATS COUNTER RIBBON -->
+      <section class="landing-stats-section">
+        <div class="landing-stats-grid">
+          <div class="landing-stat-box">
+            <div class="landing-stat-number">47</div>
+            <div class="landing-stat-title">Indikator Telaah Baku</div>
+            <div class="landing-stat-desc">Rubrik terpadu Deep Learning</div>
+          </div>
+          <div class="landing-stat-box">
+            <div class="landing-stat-number">188</div>
+            <div class="landing-stat-title">Poin Skor Maksimal</div>
+            <div class="landing-stat-desc">Skala kelayakan terstandar</div>
+          </div>
+          <div class="landing-stat-box">
+            <div class="landing-stat-number">4</div>
+            <div class="landing-stat-title">Tingkatan Akun Terpadu</div>
+            <div class="landing-stat-desc">Admin, Kepsek, Guru, Tendik</div>
+          </div>
+          <div class="landing-stat-box">
+            <div class="landing-stat-number">100%</div>
+            <div class="landing-stat-title">Berbasis Cloud & Digital</div>
+            <div class="landing-stat-desc">Arsip otomatis & audit trail</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3.5 GALERI KAMPUS & AKTIVITAS PEMBELAJARAN (DEEP LEARNING IN ACTION) -->
+      <section class="landing-gallery-section" id="galeri-section">
+        <div class="landing-section-header">
+          <span class="landing-section-badge">${isEn ? 'CAMPUS & LEARNING IN ACTION' : 'POTRET KAMPUS & AKTIVITAS PEMBELAJARAN'}</span>
+          <h2 class="landing-section-title">${isEn ? 'SMKN Wonosalam Campus & Best Practices' : 'Sekilas SMKN Wonosalam & Praktik Baik'}</h2>
+          <p class="landing-section-desc">
+            ${isEn 
+              ? 'Authentic documentation of the main campus building, industry-standard vocational workshops, and the deep learning ecosystem (Mindful, Meaningful, Joyful) at the slopes of Mount Anjasmoro, Jombang.'
+              : 'Dokumentasi autentik gedung utama sekolah, sarana kejuruan standar industri, serta iklim pembelajaran mendalam (Mindful, Meaningful, Joyful) di lereng Gunung Anjasmoro, Kabupaten Jombang.'}
+          </p>
+        </div>
+
+        <div class="landing-gallery-grid">
+          <!-- Card 1: Gedung Utama -->
+          <div class="landing-gallery-card" onclick="openPhotoModal('gedung-utama-smkn.jpg', '${isEn ? 'Main Building of SMKN Wonosalam' : 'Gedung Utama SMK Negeri Wonosalam'}', '${isEn ? 'Magnificent panorama of the Main Building and Courtyard of SMK Negeri Wonosalam set against Mount Anjasmoro in Wonosalam, Jombang, East Java.' : 'Panorama megah Gedung Utama dan Lapangan Upacara SMK Negeri Wonosalam berlatar Gunung Anjasmoro di Wonosalam, Jombang, Jawa Timur.'}', '${isEn ? 'Campus Architecture' : 'Gedung Utama & Kampus'}')">
+            <div class="landing-gallery-img-wrap">
+              <span class="landing-gallery-badge">${isEn ? 'Main Building' : 'Gedung Utama'}</span>
+              <img src="gedung-utama-smkn.jpg" alt="Gedung Utama SMK Negeri Wonosalam" loading="lazy" />
+              <div class="landing-gallery-expand-hint">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                ${isEn ? 'Expand HD' : 'Perbesar HD'}
+              </div>
             </div>
-            <div class="landing-stat-box">
-              <div class="landing-stat-number">188</div>
-              <div class="landing-stat-title">Poin Skor Maksimal</div>
-              <div class="landing-stat-desc">Skala kelayakan terstandar</div>
-            </div>
-            <div class="landing-stat-box">
-              <div class="landing-stat-number">4</div>
-              <div class="landing-stat-title">Tingkatan Akun Terpadu</div>
-              <div class="landing-stat-desc">Admin, Kepsek, Guru, Tendik</div>
-            </div>
-            <div class="landing-stat-box">
-              <div class="landing-stat-number">100%</div>
-              <div class="landing-stat-title">Berbasis Cloud & Digital</div>
-              <div class="landing-stat-desc">Arsip otomatis & audit trail</div>
+            <div class="landing-gallery-body">
+              <div class="landing-gallery-title">${isEn ? 'Main Campus at Mount Anjasmoro' : 'Gedung Utama di Lereng Gn. Anjasmoro'}</div>
+              <div class="landing-gallery-desc">
+                ${isEn 
+                  ? 'The main building complex and ceremonial plaza of SMKN Wonosalam surrounded by lush tropical greenery, offering a serene and focused learning environment.'
+                  : 'Kompleks gedung utama dan lapangan upacara SMK Negeri Wonosalam yang asri dan sejuk, menghadirkan lingkungan belajar kondusif.'}
+              </div>
+              <div class="landing-gallery-meta">
+                <span>🏛️ Jl. Anjasmoro, Jombang</span>
+                <span style="color:#38BDF8; font-weight:600;">${isEn ? 'View HD ↗' : 'Lihat Foto ↗'}</span>
+              </div>
             </div>
           </div>
-        </section>
 
-        <!-- 4. FILOSOFI DEEP LEARNING (3 PILAR) -->
+          <!-- Card 2: Halaman & Monumen Sekolah -->
+          <div class="landing-gallery-card" onclick="openPhotoModal('foto-kampus-lapangan.jpg', '${isEn ? 'School Courtyard & Monument' : 'Halaman & Monumen SMK Negeri Wonosalam'}', '${isEn ? 'School ceremony plaza with the official SMK Negeri Wonosalam stone monument and student cultural arts performance.' : 'Lapangan upacara dengan monumen kebanggaan sekolah SMK Negeri Wonosalam serta atraksi seni budaya peserta didik.'}', '${isEn ? 'School Monument' : 'Monumen Resmi'}')">
+            <div class="landing-gallery-img-wrap">
+              <span class="landing-gallery-badge">${isEn ? 'Monument' : 'Monumen Sekolah'}</span>
+              <img src="foto-kampus-lapangan.jpg" alt="Lapangan & Monumen SMKN Wonosalam" loading="lazy" />
+              <div class="landing-gallery-expand-hint">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                ${isEn ? 'Expand HD' : 'Perbesar HD'}
+              </div>
+            </div>
+            <div class="landing-gallery-body">
+              <div class="landing-gallery-title">${isEn ? 'Plaza & Iconic School Monument' : 'Halaman & Monumen Ikonik Sekolah'}</div>
+              <div class="landing-gallery-desc">
+                ${isEn
+                  ? 'The stone landmark bearing &quot;SMK NEGERI WONOSALAM&quot; as the pride of the school community and a stage for student artistic celebration.'
+                  : 'Monumen bertuliskan &quot;SMK NEGERI WONOSALAM&quot; yang menjadi landmark kebanggaan warga sekolah dan panggung kreasi bakat siswa.'}
+              </div>
+              <div class="landing-gallery-meta">
+                <span>🏅 Landmark Kampus</span>
+                <span style="color:#38BDF8; font-weight:600;">${isEn ? 'View HD ↗' : 'Lihat Foto ↗'}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Paskibra PRASNEWS -->
+          <div class="landing-gallery-card" onclick="openPhotoModal('foto-paskibra-kampus.jpg', '${isEn ? 'PRASNEWS Flag Bearers' : 'Paskibra PRASNEWS SMKN Wonosalam'}', '${isEn ? 'Flag-raising troop (PRASNEWS) marching with discipline in the school courtyard with reflective artistic presentation.' : 'Pasukan Pengibar Bendera SMK Negeri Wonosalam (PRASNEWS) berbaris tegap dengan disiplin di lapangan upacara berlatar gedung kelas.'}', '${isEn ? 'Character Building' : 'Karakter & Disiplin'}')">
+            <div class="landing-gallery-img-wrap">
+              <span class="landing-gallery-badge">${isEn ? 'Paskibra PRASNEWS' : 'Paskibra PRASNEWS'}</span>
+              <img src="foto-paskibra-kampus.jpg" alt="Paskibra PRASNEWS SMKN Wonosalam" loading="lazy" />
+              <div class="landing-gallery-expand-hint">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                ${isEn ? 'Expand HD' : 'Perbesar HD'}
+              </div>
+            </div>
+            <div class="landing-gallery-body">
+              <div class="landing-gallery-title">${isEn ? 'Student Discipline & Character' : 'Kedisiplinan & Bintalsik Peserta Didik'}</div>
+              <div class="landing-gallery-desc">
+                ${isEn
+                  ? 'Instilling integrity, rigorous discipline, and mental-physical stamina (Bintalsik) through Paskibra and vocational character building.'
+                  : 'Penanaman karakter integritas, kedisiplinan baris-berbaris, dan pembinaan mental fisik (Bintalsik) yang menjadi ciri khas SMKN Wonosalam.'}
+              </div>
+              <div class="landing-gallery-meta">
+                <span>🇮🇩 PRASNEWS Wonosalam</span>
+                <span style="color:#38BDF8; font-weight:600;">${isEn ? 'View HD ↗' : 'Lihat Foto ↗'}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4: Bengkel Mesin TPM -->
+          <div class="landing-gallery-card" onclick="openPhotoModal('foto-bengkel-pemesinan.jpg', '${isEn ? 'Mechanical Engineering Workshop' : 'Bengkel Konsentrasi Teknik Pemesinan (TPM)'}', '${isEn ? 'Vocational students operating industry-standard Westco milling and lathe machinery adhering to occupational safety standards.' : 'Siswa konsentrasi keahlian Teknik Pemesinan mengoperasikan mesin bubut/milling berstandar industri dengan APD lengkap.'}', '${isEn ? 'Vocational Practice' : 'Praktik Vokasi DUDIKA'}')">
+            <div class="landing-gallery-img-wrap">
+              <span class="landing-gallery-badge">${isEn ? 'Machining Workshop' : 'Teknik Pemesinan'}</span>
+              <img src="foto-bengkel-pemesinan.jpg" alt="Bengkel Teknik Pemesinan SMKN Wonosalam" loading="lazy" />
+              <div class="landing-gallery-expand-hint">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                ${isEn ? 'Expand HD' : 'Perbesar HD'}
+              </div>
+            </div>
+            <div class="landing-gallery-body">
+              <div class="landing-gallery-title">${isEn ? 'Industry Standard Workshops' : 'Bengkel Mesin Standar Industri'}</div>
+              <div class="landing-gallery-desc">
+                ${isEn
+                  ? 'Hands-on vocational practice aligned with industrial standards (DUDIKA), training students in precision machining and safety culture.'
+                  : 'Praktik kejuruan vokasi berstandar industri kerja (DUDIKA), membekali siswa keahlian presisi pemesinan dan budaya mutu K3.'}
+              </div>
+              <div class="landing-gallery-meta">
+                <span>⚙️ Konsentrasi Keahlian TPM</span>
+                <span style="color:#38BDF8; font-weight:600;">${isEn ? 'View HD ↗' : 'Lihat Foto ↗'}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 5: SMEKNEWS Studio & Kuliner -->
+          <div class="landing-gallery-card" onclick="openPhotoModal('foto-studio-smeknews.jpg', '${isEn ? 'SMEKNEWS Studio & Culinary' : 'SMEKNEWS Studio & Konsentrasi Kuliner'}', '${isEn ? 'Students in official SMKN Wonosalam uniform and Culinary chef jacket co-hosting an educational broadcast.' : 'Siswi berseragam resmi SMKN Wonosalam dan siswi konsentrasi Kuliner/Tata Boga memandu siniar podcast di SMEKNEWS Studio.'}', '${isEn ? 'Broadcasting & Culinary' : 'Broadcasting & Kuliner'}')">
+            <div class="landing-gallery-img-wrap">
+              <span class="landing-gallery-badge">${isEn ? 'Studio & Culinary' : 'SMEKNEWS Studio'}</span>
+              <img src="foto-studio-smeknews.jpg" alt="SMEKNEWS Studio & Kuliner" loading="lazy" />
+              <div class="landing-gallery-expand-hint">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                ${isEn ? 'Expand HD' : 'Perbesar HD'}
+              </div>
+            </div>
+            <div class="landing-gallery-body">
+              <div class="landing-gallery-title">${isEn ? 'SMEKNEWS Studio & Culinary Arts' : 'SMEKNEWS Studio & Praktik Kuliner'}</div>
+              <div class="landing-gallery-desc">
+                ${isEn
+                  ? 'The school digital podcast studio working in tandem with the Culinary Arts department, honing public speaking and modern creative media skills.'
+                  : 'Studio podcast digital interaktif sekolah bersinergi dengan konsentrasi keahlian Kuliner/Tata Boga mengasah kemampuan komunikasi publik.'}
+              </div>
+              <div class="landing-gallery-meta">
+                <span>🎙️ Studio Kreatif Digital</span>
+                <span style="color:#38BDF8; font-weight:600;">${isEn ? 'View HD ↗' : 'Lihat Foto ↗'}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 6: Collaborative Deep Learning -->
+          <div class="landing-gallery-card" onclick="openPhotoModal('foto-pembelajaran-kolaboratif.jpg', '${isEn ? 'Collaborative Deep Learning' : 'Pembelajaran Kolaboratif Deep Learning'}', '${isEn ? 'Students actively discussing contextual project artifacts in class, embodying meaningful and joyful learning.' : 'Siswi berdiskusi aktif menyusun proyek kontekstual di kelas, mewujudkan pembelajaran yang bermakna dan menggembirakan.'}', '${isEn ? 'Classroom Deep Learning' : 'Deep Learning di Kelas'}')">
+            <div class="landing-gallery-img-wrap">
+              <span class="landing-gallery-badge">${isEn ? 'Meaningful & Joyful' : 'Meaningful & Joyful'}</span>
+              <img src="foto-pembelajaran-kolaboratif.jpg" alt="Pembelajaran Kolaboratif Siswi SMKN Wonosalam" loading="lazy" />
+              <div class="landing-gallery-expand-hint">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                ${isEn ? 'Expand HD' : 'Perbesar HD'}
+              </div>
+            </div>
+            <div class="landing-gallery-body">
+              <div class="landing-gallery-title">${isEn ? 'Active Collaborative Learning' : 'Aktivitas Belajar Kolaboratif di Kelas'}</div>
+              <div class="landing-gallery-desc">
+                ${isEn
+                  ? 'Implementation of Meaningful & Joyful Learning: students working together on real-world problem-solving and thematic presentation projects.'
+                  : 'Implementasi pilar Meaningful & Joyful Learning: siswa bekerja sama memecahkan masalah riil dan mempresentasikan proyek tematik.'}
+              </div>
+              <div class="landing-gallery-meta">
+                <span>💡 Active Student Learning</span>
+                <span style="color:#38BDF8; font-weight:600;">${isEn ? 'View HD ↗' : 'Lihat Foto ↗'}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 7: Perpustakaan & Literasi -->
+          <div class="landing-gallery-card" onclick="openPhotoModal('foto-perpustakaan-literasi.jpg', '${isEn ? 'Digital Literacy & Library' : 'Ruang Literasi & Perpustakaan Digital'}', '${isEn ? 'Student in school blazer studying reference materials and digital resources independently in the school library.' : 'Siswi berjas almamater SMKN Wonosalam melakukan telaah materi dan literasi digital mandiri di perpustakaan sekolah.'}', '${isEn ? 'Mindful & Research' : 'Mindful & Riset'}')">
+            <div class="landing-gallery-img-wrap">
+              <span class="landing-gallery-badge">${isEn ? 'Digital Library' : 'Perpustakaan Digital'}</span>
+              <img src="foto-perpustakaan-literasi.jpg" alt="Perpustakaan SMKN Wonosalam" loading="lazy" />
+              <div class="landing-gallery-expand-hint">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                ${isEn ? 'Expand HD' : 'Perbesar HD'}
+              </div>
+            </div>
+            <div class="landing-gallery-body">
+              <div class="landing-gallery-title">${isEn ? 'Digital Literacy & Self-Paced Study' : 'Pojok Literasi & Riset Digital Mandiri'}</div>
+              <div class="landing-gallery-desc">
+                ${isEn
+                  ? 'Serene library environment equipped with rich references, nurturing metacognition, critical reading, and learning autonomy (Mindful Learning).'
+                  : 'Fasilitas perpustakaan yang tenang dan kaya referensi, mendorong metakognisi, pembacaan kritis, dan kemandirian belajar (Mindful Learning).'}
+              </div>
+              <div class="landing-gallery-meta">
+                <span>📚 Literasi & Metakognisi</span>
+                <span style="color:#38BDF8; font-weight:600;">${isEn ? 'View HD ↗' : 'Lihat Foto ↗'}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 8: Tari Remo Budaya Lokal -->
+          <div class="landing-gallery-card" onclick="openPhotoModal('foto-tari-remo-budaya.jpg', '${isEn ? 'Traditional Remo Dance' : 'Tari Remo di Selasar Gedung Sekolah'}', '${isEn ? 'Preserving East Javanese heritage through traditional Remo dance performances along the school building verandas.' : 'Pelestarian seni tari tradisional Remo khas Jawa Timur di sepanjang selasar koridor gedung sekolah SMKN Wonosalam.'}', '${isEn ? 'Local Heritage' : 'Kearifan Budaya Lokal'}')">
+            <div class="landing-gallery-img-wrap">
+              <span class="landing-gallery-badge">${isEn ? 'Local Heritage' : 'Tari Remo Tradisional'}</span>
+              <img src="foto-tari-remo-budaya.jpg" alt="Tari Remo di SMKN Wonosalam" loading="lazy" />
+              <div class="landing-gallery-expand-hint">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                ${isEn ? 'Expand HD' : 'Perbesar HD'}
+              </div>
+            </div>
+            <div class="landing-gallery-body">
+              <div class="landing-gallery-title">${isEn ? 'East Javanese Remo Cultural Dance' : 'Pelestarian Seni Tari Remo Jawa Timur'}</div>
+              <div class="landing-gallery-desc">
+                ${isEn
+                  ? 'Nurturing Pancasila Student Profile values through regional traditional arts on the breezy corridors of SMKN Wonosalam.'
+                  : 'Penguatan Profil Pelajar Pancasila melalui apresiasi seni dan budaya daerah di selasar gedung sekolah yang sejuk dan asri.'}
+              </div>
+              <div class="landing-gallery-meta">
+                <span>🎭 Kearifan Lokal Jombang</span>
+                <span style="color:#38BDF8; font-weight:600;">${isEn ? 'View HD ↗' : 'Lihat Foto ↗'}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 9: Supervisi Guru -->
+          <div class="landing-gallery-card" onclick="openPhotoModal('foto-supervisi-akademik.jpg', '${isEn ? 'Teacher Supervision Session' : 'Supervisi & Dialog Pedagogis Guru'}', '${isEn ? 'Face-to-face academic supervision and teaching module review dialogue between school leaders and teaching staff.' : 'Sesi supervisi akademik dan penelaahan modul ajar tatap muka antara pimpinan sekolah dan guru pengampu.'}', '${isEn ? 'Academic Supervision' : 'Supervisi Mutu'}')">
+            <div class="landing-gallery-img-wrap">
+              <span class="landing-gallery-badge">${isEn ? 'Quality Supervision' : 'Supervisi Mutu'}</span>
+              <img src="foto-supervisi-akademik.jpg" alt="Supervisi Guru SMKN Wonosalam" loading="lazy" />
+              <div class="landing-gallery-expand-hint">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                ${isEn ? 'Expand HD' : 'Perbesar HD'}
+              </div>
+            </div>
+            <div class="landing-gallery-body">
+              <div class="landing-gallery-title">${isEn ? 'Academic Supervision & Module Review' : 'Supervisi Akademik & Telaah Modul'}</div>
+              <div class="landing-gallery-desc">
+                ${isEn
+                  ? 'Continuous constructive dialogue to uphold instructional quality and support teachers in achieving the 47 Deep Learning indicators.'
+                  : 'Dialog pembinaan profesionalisme guru secara berkala untuk memastikan modul ajar memenuhi 47 indikator Deep Learning.'}
+              </div>
+              <div class="landing-gallery-meta">
+                <span>👔 Penjaminan Mutu Ajar</span>
+                <span style="color:#38BDF8; font-weight:600;">${isEn ? 'View HD ↗' : 'Lihat Foto ↗'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. FILOSOFI DEEP LEARNING (3 PILAR) -->
         <section class="landing-section" id="deep-learning-section">
           <div class="landing-section-header">
             <span class="landing-section-badge">FONDASI PEDAGOGIS GEMPITA 2026</span>
@@ -2361,12 +2611,13 @@
             <div class="landing-footer-col">
               <h4>Navigasi Pintas</h4>
               <ul class="landing-footer-links">
-                <li><a onclick="window.scrollTo({top:0, behavior:'smooth'})">Beranda Portal</a></li>
-                <li><a onclick="scrollToLandingSection('deep-learning-section')">Filosofi Deep Learning</a></li>
-                <li><a onclick="scrollToLandingSection('ekosistem-section')">Sinergi 4 Tingkatan Akun</a></li>
-                <li><a onclick="scrollToLandingSection('rubrik-section')">Instrumen 47 Indikator</a></li>
-                <li><a onclick="scrollToLandingSection('dokumen-section')">Dokumen Siap Cetak</a></li>
-                <li><a onclick="scrollToLandingSection('inovator-section')">Profil Inovator GEMPITA</a></li>
+                <li><a onclick="window.scrollTo({top:0, behavior:'smooth'})">${isEn ? 'Home Portal' : 'Beranda Portal'}</a></li>
+                <li><a onclick="scrollToLandingSection('galeri-section')">${isEn ? 'Campus Gallery' : 'Galeri Kampus & Aktivitas'}</a></li>
+                <li><a onclick="scrollToLandingSection('deep-learning-section')">${isEn ? 'Deep Learning Philosophy' : 'Filosofi Deep Learning'}</a></li>
+                <li><a onclick="scrollToLandingSection('ekosistem-section')">${isEn ? '4 Account Roles' : 'Sinergi 4 Tingkatan Akun'}</a></li>
+                <li><a onclick="scrollToLandingSection('rubrik-section')">${isEn ? '47 Indicators' : 'Instrumen 47 Indikator'}</a></li>
+                <li><a onclick="scrollToLandingSection('dokumen-section')">${isEn ? 'Printable Documents' : 'Dokumen Siap Cetak'}</a></li>
+                <li><a onclick="scrollToLandingSection('inovator-section')">${isEn ? 'Innovator Profile' : 'Profil Inovator GEMPITA'}</a></li>
               </ul>
             </div>
 
@@ -2398,6 +2649,12 @@
           <button class="landing-float-btn" onclick="scrollToLandingTop()" title="Kembali ke Atas Halaman Beranda">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
             <span>Ke Atas</span>
+          </button>
+
+          <!-- Gallery Shortcut Button -->
+          <button class="landing-float-btn" onclick="scrollToLandingSection('galeri-section')" title="Lihat Galeri Foto SMKN Wonosalam">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span>Galeri Foto</span>
           </button>
 
           <!-- Direct Dashboard Access Button -->
@@ -2434,6 +2691,54 @@
     saveState();
     renderApp();
   };
+
+  window.openPhotoModal = function (src, title, desc, tag) {
+    let modal = document.getElementById('landingPhotoModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'landingPhotoModal';
+      document.body.appendChild(modal);
+    }
+    modal.innerHTML = `
+      <div class="landing-photo-modal-overlay" onclick="closePhotoModal(event)">
+        <div class="landing-photo-modal-content" onclick="event.stopPropagation()">
+          <div class="landing-photo-modal-header">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span class="landing-gallery-badge" style="position:static;">${tag || 'Dokumentasi Resmi'}</span>
+              <h3 style="font-size:1.05rem; font-weight:700; color:#FFFFFF; margin:0;">${title}</h3>
+            </div>
+            <button class="landing-photo-modal-close" onclick="closePhotoModal()" title="Tutup Preview">&times;</button>
+          </div>
+          <div class="landing-photo-modal-img-wrap">
+            <img src="${src}" alt="${title}" onerror="this.src='gedung-utama-smkn.jpg'"/>
+          </div>
+          <div class="landing-photo-modal-footer">
+            <p>${desc}</p>
+            <div class="caption-meta">
+              <span>🏫 <b>SMK Negeri Wonosalam (Jombang)</b> • Lereng Gunung Anjasmoro</span>
+              <span>📸 Dokumentasi Praktik Baik & Pembelajaran Mendalam</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  };
+
+  window.closePhotoModal = function () {
+    const modal = document.getElementById('landingPhotoModal');
+    if (modal) {
+      modal.innerHTML = '';
+    }
+  };
+
+  if (!window._landingPhotoEscBound) {
+    window._landingPhotoEscBound = true;
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        window.closePhotoModal();
+      }
+    });
+  }
 
   /* ------------------- 3-TAB AUTHENTICATION (MATCHING GAMBAR 1 + NEW USER + RECOVERY) ------------------- */
   function renderLoginPage() {
