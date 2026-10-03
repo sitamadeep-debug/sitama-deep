@@ -4,7 +4,7 @@
 
 (function () {
   // Version Guard: Otomatis membersihkan cache localStorage jika versi aplikasi diperbarui, tapi pertahankan kredensial Supabase & sesi user
-  const APP_VERSION = '2026.10.03.v23';
+  const APP_VERSION = '2026.10.03.v24';
   if (localStorage.getItem('sitama_app_version') !== APP_VERSION) {
     const savedSbUrl = localStorage.getItem('sitama_supabase_url');
     const savedSbKey = localStorage.getItem('sitama_supabase_anon_key');
@@ -1862,14 +1862,9 @@
               🌐 ${state.lang.toUpperCase()}
             </button>
 
-            <!-- Dashboard Button (Prominent & Always Visible) -->
-            <button class="landing-btn landing-btn-primary landing-btn-sm" onclick="navigateTo('dashboard')" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); box-shadow: 0 2px 10px rgba(16,185,129,0.4);" title="Buka Dashboard Aplikasi SITAMA-DEEP">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-              ${isEn ? 'Dashboard' : 'Buka Dashboard'}
-            </button>
-
             <!-- Portal Login Button -->
-            <button class="landing-btn landing-btn-secondary landing-btn-sm" onclick="navigateTo('login')">
+            <button class="landing-btn landing-btn-primary landing-btn-sm" onclick="navigateTo('login')">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"></line></svg>
               ${isEn ? 'Login' : 'Masuk'}
             </button>
           </div>
@@ -1907,11 +1902,6 @@
                 <button class="landing-btn landing-btn-primary" onclick="navigateTo('login')">
                   <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"></line></svg>
                   ${isEn ? 'Open Official Portal / Login' : 'Masuk ke Aplikasi Portal'}
-                </button>
-
-                <button class="landing-btn landing-btn-secondary" onclick="navigateTo('dashboard')">
-                  <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                  ${isEn ? 'Explore Live Dashboard' : 'Eksplorasi Demo Dashboard'}
                 </button>
 
                 <button class="landing-btn landing-btn-outline" onclick="scrollToLandingSection('galeri-section')">
@@ -1992,8 +1982,8 @@
               <span style="color:#38BDF8; font-weight:600;">Tervalidasi Digital ✓</span>
             </div>
 
-            <button class="landing-btn landing-btn-secondary landing-btn-sm" style="width:100%; margin-top:14px;" onclick="navigateTo('dashboard')">
-              Buka Lembar Telaah Lengkap di Dashboard →
+            <button class="landing-btn landing-btn-secondary landing-btn-sm" style="width:100%; margin-top:14px;" onclick="navigateTo('login')">
+              ${isEn ? 'Log in to View Full Review →' : 'Masuk untuk Telaah Lengkap →'}
             </button>
           </div>
         </section>
@@ -2648,11 +2638,11 @@
             <div class="landing-footer-col">
               <h4>Konsentrasi Keahlian</h4>
               <ul class="landing-footer-links">
-                <li><a onclick="navigateTo('dashboard')">Agribisnis Tanaman Perkebunan (ATP)</a></li>
-                <li><a onclick="navigateTo('dashboard')">Kuliner / Tata Boga</a></li>
-                <li><a onclick="navigateTo('dashboard')">Teknik Kendaraan Ringan (TKR)</a></li>
-                <li><a onclick="navigateTo('dashboard')">Teknik Pemesinan (TPM)</a></li>
-                <li><a onclick="navigateTo('dashboard')">Mata Pelajaran Umum & IPAS</a></li>
+                <li><a onclick="navigateTo('login')">Agribisnis Tanaman Perkebunan (ATP)</a></li>
+                <li><a onclick="navigateTo('login')">Kuliner / Tata Boga</a></li>
+                <li><a onclick="navigateTo('login')">Teknik Kendaraan Ringan (TKR)</a></li>
+                <li><a onclick="navigateTo('login')">Teknik Pemesinan (TPM)</a></li>
+                <li><a onclick="navigateTo('login')">Mata Pelajaran Umum & IPAS</a></li>
               </ul>
             </div>
           </div>
