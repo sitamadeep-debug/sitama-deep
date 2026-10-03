@@ -4,7 +4,7 @@
 
 (function () {
   // Version Guard: Otomatis membersihkan cache localStorage jika versi aplikasi diperbarui, tapi pertahankan kredensial Supabase & sesi user
-  const APP_VERSION = '2026.10.03.v17';
+  const APP_VERSION = '2026.10.03.v18';
   if (localStorage.getItem('sitama_app_version') !== APP_VERSION) {
     const savedSbUrl = localStorage.getItem('sitama_supabase_url');
     const savedSbKey = localStorage.getItem('sitama_supabase_anon_key');
@@ -2663,12 +2663,6 @@
           <button class="landing-float-btn" onclick="scrollToLandingSection('galeri-section')" title="Lihat Galeri Foto SMKN Wonosalam">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
             <span>Galeri Foto</span>
-          </button>
-
-          <!-- Direct Dashboard Access Button -->
-          <button class="landing-float-btn primary" onclick="navigateTo('dashboard')" title="Langsung Buka Dashboard Aplikasi">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-            <span>Buka Dashboard</span>
           </button>
         </div>
       </div>
