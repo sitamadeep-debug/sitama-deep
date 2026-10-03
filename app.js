@@ -1949,8 +1949,8 @@
               ${!state.recoveryOtpGenerated ? `
                 <form onsubmit="handleForgotPasswordRequest(event)">
                   <div class="form-group">
-                    <label>Email atau Username</label>
-                    <input type="text" class="form-control" id="forgotInput" placeholder="Contoh: kepsek@smknwonosalam.sch.id" value="kepsek" required />
+                    <label>Email atau Username Terdaftar</label>
+                    <input type="text" class="form-control" id="forgotInput" placeholder="Masukkan username atau email akun Anda..." value="${state.prefilledForgotUser || ''}" required />
                   </div>
                   <button type="submit" class="btn btn-primary" style="width:100%; padding:12px;">
                     Kirim Link & Kode Pemulihan ke Email
@@ -1968,6 +1968,10 @@
                   </div>
                   <div style="font-size:0.78rem; color:#475569; margin-top:8px;">
                     💡 <i>Silakan periksa <b>Kotak Masuk (Inbox)</b> atau folder <b>Spam</b> di aplikasi Gmail Anda, lalu masukkan 6 digit kode OTP di bawah ini:</i>
+                  </div>
+                  <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid #DBEAFE; padding-top:8px;">
+                    <span style="font-size:0.76rem; color:#64748B;">Bukan akun Anda atau salah ketik?</span>
+                    <button type="button" class="btn btn-outline" style="font-size:0.75rem; padding:3px 10px; background:#fff;" onclick="handleResetOtpState()">← Ubah Email / Username</button>
                   </div>
                 </div>
 
@@ -2313,10 +2317,24 @@
   };
 
   window.setAuthTab = function (tab) {
+    const loginEl = document.getElementById('loginUser');
+    if (loginEl && loginEl.value && loginEl.value.trim()) {
+      state.prefilledForgotUser = loginEl.value.trim();
+    }
     state.authTab = tab;
     state.recoverySuccessMsg = '';
     state.recoveryErrorMsg = '';
     state.registerSuccessMsg = '';
+    state.recoveryOtpGenerated = '';
+    state.recoveryUser = null;
+    renderApp();
+  };
+
+  window.handleResetOtpState = function () {
+    state.recoveryOtpGenerated = '';
+    state.recoveryUser = null;
+    state.recoverySuccessMsg = '';
+    state.recoveryErrorMsg = '';
     renderApp();
   };
 
@@ -2441,6 +2459,25 @@
     logActivity('Registrasi Pengguna', `Akun baru terdaftar: ${name} (${role})`);
     saveState();
 
+    if (window.SitamaDB && window.SitamaDB.client) {
+      window.SitamaDB.client.from('profiles').insert([{
+        id: newUser.id,
+        name: newUser.name,
+        title_badge: newUser.title_badge,
+        email: newUser.email,
+        username: newUser.username,
+        password_hash: newUser.password,
+        role: newUser.role,
+        nip: newUser.nip,
+        phone: newUser.phone,
+        status: newUser.status,
+        department: newUser.department,
+        subject_name: newUser.subject_name
+      }]).then(({ error }) => {
+        if (error) console.warn('Supabase profile registration sync error:', error);
+      });
+    }
+
     state.authTab = 'login';
     state.lastRegisteredUsername = username;
     state.registerSuccessMsg = `Selamat! Akun ${name} berhasil dibuat. Silakan masuk menggunakan username: "${username}".`;
@@ -2461,6 +2498,7 @@
     }
 
     const rawOtp = String(Math.floor(100000 + Math.random() * 900000));
+    const expiryTime = new Date(Date.now() + 15 * 60 * 1000).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
     state.recoveryUser = user;
     state.recoveryOtpGenerated = rawOtp;
     state.recoveryErrorMsg = '';
@@ -2473,13 +2511,17 @@
         emailjs.send('service_n17kfit', 'template_kq9i466', {
           to_email: user.email,
           email: user.email,
+          user_email: user.email,
+          recipient: user.email,
           to_name: user.name,
           name: user.name,
+          user_name: user.name,
           passcode: rawOtp,
           otp: rawOtp,
           otp_code: rawOtp,
           code: rawOtp,
           message: rawOtp,
+          time: expiryTime,
           app_name: 'SITAMA-DEEP SMK Negeri Wonosalam'
         }).then(
           function (res) { console.log('✅ Email OTP terkirim ke Gmail:', res.status, res.text); },
