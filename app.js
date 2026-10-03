@@ -2492,8 +2492,14 @@
     const userInDb = state.users.find(u => u.id === state.recoveryUser.id);
     if (userInDb) {
       userInDb.password = newPass;
-      logActivity('Reset Kata Sandi', `Pengguna ${userInDb.name} mengatur ulang sandi.`);
+      logActivity('Reset Kata Sandi', `Pengguna ${userInDb.name} mengatur ulang sandi secara mandiri.`);
       saveState();
+
+      // Sinkronisasi otomatis ke Cloud Supabase jika terhubung
+      if (window.SitamaDB && window.SitamaDB.client) {
+        window.SitamaDB.client.from('profiles').update({ password_hash: newPass }).eq('id', userInDb.id)
+          .then(({ error }) => { if (error) console.warn('Supabase password sync:', error); });
+      }
     }
 
     state.authTab = 'login';
