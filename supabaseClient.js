@@ -6,8 +6,14 @@
   const DEFAULT_SUPABASE_URL = "";
   const DEFAULT_SUPABASE_ANON_KEY = "";
 
-  const savedUrl = localStorage.getItem('sitama_supabase_url') || DEFAULT_SUPABASE_URL;
-  const savedKey = localStorage.getItem('sitama_supabase_anon_key') || DEFAULT_SUPABASE_ANON_KEY;
+  function normalizeUrl(url) {
+    if (!url) return '';
+    return url.trim().replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '');
+  }
+
+  const rawUrl = localStorage.getItem('sitama_supabase_url') || DEFAULT_SUPABASE_URL;
+  const savedUrl = normalizeUrl(rawUrl);
+  const savedKey = (localStorage.getItem('sitama_supabase_anon_key') || DEFAULT_SUPABASE_ANON_KEY).trim();
 
   let client = null;
 
@@ -35,8 +41,9 @@
       };
     },
     saveConfig: function (url, key) {
-      localStorage.setItem('sitama_supabase_url', url.trim());
-      localStorage.setItem('sitama_supabase_anon_key', key.trim());
+      const clean = normalizeUrl(url);
+      localStorage.setItem('sitama_supabase_url', clean);
+      localStorage.setItem('sitama_supabase_anon_key', (key || '').trim());
       location.reload();
     },
 
