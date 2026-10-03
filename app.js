@@ -4,7 +4,7 @@
 
 (function () {
   // Version Guard: Otomatis membersihkan cache localStorage jika versi aplikasi diperbarui, tapi pertahankan kredensial Supabase & sesi user
-  const APP_VERSION = '2026.10.03.v18';
+  const APP_VERSION = '2026.10.03.v19';
   if (localStorage.getItem('sitama_app_version') !== APP_VERSION) {
     const savedSbUrl = localStorage.getItem('sitama_supabase_url');
     const savedSbKey = localStorage.getItem('sitama_supabase_anon_key');
@@ -53,6 +53,7 @@
     
     // Auth Tab & Password Recovery State
     authTab: 'login', // 'login' | 'register' | 'forgot'
+    loginPresetUser: '',
     recoveryUser: null,
     recoveryOtpGenerated: '',
     recoverySuccessMsg: '',
@@ -1906,15 +1907,15 @@
               <!-- Quick Demo Role Launcher Chips -->
               <div class="landing-quick-roles">
                 <div class="landing-quick-roles-label">
-                  ⚡ ${isEn ? 'Instant Demo - Click to enter as any role:' : 'Uji coba langsung tanpa instalasi (Pilih salah satu peran):'}
+                  ⚡ ${isEn ? 'Select role to login with credentials:' : 'Pilih peran untuk login ke sistem:'}
                 </div>
                 <div class="landing-chips-container">
-                  <button class="landing-role-chip" onclick="quickLogin('USR-002')">👔 2. Kepsek (Sudarso, S.Pd.)</button>
-                  <button class="landing-role-chip" onclick="quickLogin('USR-002B')">👔 2. Waka (Drs. Bambang)</button>
-                  <button class="landing-role-chip" onclick="quickLogin('USR-003')">👨‍🏫 3. Guru ATP (Budi)</button>
-                  <button class="landing-role-chip" onclick="quickLogin('USR-004')">🍳 3. Guru Kuliner (Dewi)</button>
-                  <button class="landing-role-chip" onclick="quickLogin('USR-008')">📋 4. Tendik / TU (Tri)</button>
-                  <button class="landing-role-chip" onclick="quickLogin('USR-001')">🛠️ 1. Admin (Siti)</button>
+                  <button class="landing-role-chip" onclick="openLoginWithRole('kepsek')">👔 2. Kepsek (Sudarso, S.Pd.)</button>
+                  <button class="landing-role-chip" onclick="openLoginWithRole('waka_kurikulum')">👔 2. Waka (Drs. Bambang)</button>
+                  <button class="landing-role-chip" onclick="openLoginWithRole('guru_atp')">👨‍🏫 3. Guru ATP (Budi)</button>
+                  <button class="landing-role-chip" onclick="openLoginWithRole('guru_kuliner')">🍳 3. Guru Kuliner (Dewi)</button>
+                  <button class="landing-role-chip" onclick="openLoginWithRole('tendik_tu')">📋 4. Tendik / TU (Tri)</button>
+                  <button class="landing-role-chip" onclick="openLoginWithRole('admin')">🛠️ 1. Admin (Siti)</button>
                 </div>
               </div>
             </div>
@@ -2332,7 +2333,7 @@
                   <li><svg width="14" height="14" fill="none" stroke="#10B981" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Konfigurasi Rubrik & Skala Kelayakan Kedinasan</li>
                 </ul>
               </div>
-              <button class="landing-btn landing-btn-secondary landing-btn-sm" style="width:100%;" onclick="quickLogin('USR-001')">
+              <button class="landing-btn landing-btn-secondary landing-btn-sm" style="width:100%;" onclick="openLoginWithRole('admin')">
                 Masuk sebagai Admin Sistem →
               </button>
             </div>
@@ -2360,7 +2361,7 @@
                   <li><svg width="14" height="14" fill="none" stroke="#10B981" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Pengesahan Digital & Penerbitan Lembar Telaah Resmi</li>
                 </ul>
               </div>
-              <button class="landing-btn landing-btn-primary landing-btn-sm" style="width:100%;" onclick="quickLogin('USR-002')">
+              <button class="landing-btn landing-btn-primary landing-btn-sm" style="width:100%;" onclick="openLoginWithRole('kepsek')">
                 Masuk sebagai Kepala Sekolah →
               </button>
             </div>
@@ -2388,7 +2389,7 @@
                   <li><svg width="14" height="14" fill="none" stroke="#10B981" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Alur Revisi Berkelanjutan dengan Riwayat Versi Aman</li>
                 </ul>
               </div>
-              <button class="landing-btn landing-btn-secondary landing-btn-sm" style="width:100%;" onclick="quickLogin('USR-003')">
+              <button class="landing-btn landing-btn-secondary landing-btn-sm" style="width:100%;" onclick="openLoginWithRole('guru_atp')">
                 Masuk sebagai Guru Pengampu →
               </button>
             </div>
@@ -2416,7 +2417,7 @@
                   <li><svg width="14" height="14" fill="none" stroke="#10B981" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Cetak Tanda Terima Penyerahan Berkas Kedinasan</li>
                 </ul>
               </div>
-              <button class="landing-btn landing-btn-secondary landing-btn-sm" style="width:100%;" onclick="quickLogin('USR-008')">
+              <button class="landing-btn landing-btn-secondary landing-btn-sm" style="width:100%;" onclick="openLoginWithRole('tendik_tu')">
                 Masuk sebagai Tendik / TU →
               </button>
             </div>
@@ -2573,20 +2574,20 @@
               Siap Menguatkan Perencanaan Pembelajaran?
             </h2>
             <p class="landing-section-desc" style="margin-bottom:28px;">
-              Gunakan akun Anda untuk memulai proses penelaahan atau coba simulasi langsung menggunakan salah satu akun demo berikut:
+              Gunakan akun Anda untuk memulai proses penelaahan. Pilih peran untuk masuk:
             </p>
 
             <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-bottom:28px;">
-              <button class="landing-btn landing-btn-primary" onclick="quickLogin('USR-002')">
+              <button class="landing-btn landing-btn-primary" onclick="openLoginWithRole('kepsek')">
                 Masuk sebagai Kepala Sekolah (Sudarso)
               </button>
-              <button class="landing-btn landing-btn-secondary" onclick="quickLogin('USR-003')">
+              <button class="landing-btn landing-btn-secondary" onclick="openLoginWithRole('guru_atp')">
                 Masuk sebagai Guru ATP (Budi)
               </button>
-              <button class="landing-btn landing-btn-secondary" onclick="quickLogin('USR-008')">
+              <button class="landing-btn landing-btn-secondary" onclick="openLoginWithRole('tendik_tu')">
                 Masuk sebagai Tendik / TU (Tri)
               </button>
-              <button class="landing-btn landing-btn-secondary" onclick="quickLogin('USR-001')">
+              <button class="landing-btn landing-btn-secondary" onclick="openLoginWithRole('admin')">
                 Masuk sebagai Administrator (Siti)
               </button>
             </div>
@@ -2797,12 +2798,12 @@
             <form onsubmit="handleLoginSubmit(event)">
               <div class="form-group" style="text-align:left;">
                 <label>${t('emailOrUsername')}</label>
-                <input type="text" class="form-control" id="loginUser" placeholder="Email atau username..." value="${state.lastRegisteredUsername || 'kepsek'}" required/>
+                <input type="text" class="form-control" id="loginUser" placeholder="Email atau username..." value="${state.loginPresetUser || state.lastRegisteredUsername || ''}" required/>
               </div>
 
               <div class="form-group" style="text-align:left;">
                 <label>${t('password')}</label>
-                <input type="password" class="form-control" id="loginPass" value="password123" required/>
+                <input type="password" class="form-control" id="loginPass" placeholder="Masukkan kata sandi..." value="" required autocomplete="current-password"/>
               </div>
 
               <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.82rem; margin-bottom:18px;">
@@ -2815,16 +2816,16 @@
               </button>
             </form>
 
-            <!-- Quick Demo Role Switcher matching Gambar 1 -->
+            <!-- Quick Demo Role Switcher: Sekarang hanya mengisi username, pengguna tetap wajib masukkan password -->
             <div style="border-top:1px solid var(--border-color); padding-top:16px; font-size:0.78rem; color:var(--text-muted);">
-              <p style="margin-bottom:8px; font-weight:700;">Atau masuk langsung sebagai demo role (4 Level Akun):</p>
+              <p style="margin-bottom:8px; font-weight:700;">Pilih username akun demo (tetap wajib memasukkan kata sandi):</p>
               <div style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap;">
-                <button class="demo-role-pill" onclick="quickLogin('USR-001')">1. Admin (Siti)</button>
-                <button class="demo-role-pill" onclick="quickLogin('USR-002')">2. Kepsek (Sudarso)</button>
-                <button class="demo-role-pill" onclick="quickLogin('USR-002B')">2. Waka (Bambang)</button>
-                <button class="demo-role-pill" onclick="quickLogin('USR-003')">3. Guru (Budi)</button>
-                <button class="demo-role-pill" onclick="quickLogin('USR-004')">3. Guru (Dewi)</button>
-                <button class="demo-role-pill" onclick="quickLogin('USR-008')">4. Tendik (Tri TU)</button>
+                <button type="button" class="demo-role-pill" onclick="selectDemoUser('admin')">1. Admin (Siti)</button>
+                <button type="button" class="demo-role-pill" onclick="selectDemoUser('kepsek')">2. Kepsek (Sudarso)</button>
+                <button type="button" class="demo-role-pill" onclick="selectDemoUser('waka_kurikulum')">2. Waka (Bambang)</button>
+                <button type="button" class="demo-role-pill" onclick="selectDemoUser('guru_atp')">3. Guru (Budi)</button>
+                <button type="button" class="demo-role-pill" onclick="selectDemoUser('guru_kuliner')">3. Guru (Dewi)</button>
+                <button type="button" class="demo-role-pill" onclick="selectDemoUser('tendik_tu')">4. Tendik (Tri TU)</button>
               </div>
             </div>
           ` : ''}
@@ -3349,13 +3350,31 @@
     renderApp();
   };
 
+  window.openLoginWithRole = function (roleUsername) {
+    state.loginPresetUser = roleUsername || '';
+    state.authTab = 'login';
+    state.recoveryErrorMsg = '';
+    state.recoverySuccessMsg = '';
+    navigateTo('login');
+  };
+
+  window.selectDemoUser = function (uname) {
+    const userInput = document.getElementById('loginUser');
+    const passInput = document.getElementById('loginPass');
+    if (userInput) userInput.value = uname;
+    if (passInput) {
+      passInput.value = '';
+      passInput.focus();
+    }
+  };
+
   window.quickLogin = function (userId) {
     const user = state.users.find(u => u.id === userId);
     if (user) {
       state.currentUserId = user.id;
       state.currentRole = user.role;
       state.currentView = 'dashboard';
-      logActivity('Masuk Cepat Demo', `Masuk sebagai ${user.name} (${user.role})`);
+      logActivity('Ganti Peran Internal', `Beralih peran sebagai ${user.name} (${user.role})`);
       saveState();
       renderApp();
     }
@@ -3366,6 +3385,15 @@
     const loginInput = document.getElementById('loginUser').value.trim();
     const passInput = document.getElementById('loginPass').value.trim();
 
+    if (!loginInput) {
+      alert('Silakan masukkan Email atau Username Anda!');
+      return;
+    }
+    if (!passInput) {
+      alert('Silakan masukkan Kata Sandi Anda!');
+      return;
+    }
+
     const user = state.users.find(u => 
       (u.username.toLowerCase() === loginInput.toLowerCase() || u.email.toLowerCase() === loginInput.toLowerCase()) &&
       (u.password === passInput || passInput === 'password123' || passInput === 'password')
@@ -3374,12 +3402,13 @@
     if (user) {
       state.currentUserId = user.id;
       state.currentRole = user.role;
+      state.loginPresetUser = '';
       state.currentView = 'dashboard';
       logActivity('Login Sistem', `Pengguna ${user.name} berhasil masuk`);
       saveState();
       renderApp();
     } else {
-      alert('Email/Username atau Kata Sandi salah! Untuk demo, silakan gunakan kata sandi: password123 atau klik tombol demo di bawah.');
+      alert('Email/Username atau Kata Sandi salah! Silakan periksa kembali kredensial Anda (kata sandi default akun SMKN Wonosalam: password123).');
     }
   };
 
