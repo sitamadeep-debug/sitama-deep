@@ -4,7 +4,7 @@
 
 (function () {
   // Version Guard: Otomatis membersihkan cache localStorage jika versi aplikasi diperbarui
-  const APP_VERSION = '2026.10.03.v7';
+  const APP_VERSION = '2026.10.03.v8';
   if (localStorage.getItem('sitama_app_version') !== APP_VERSION) {
     localStorage.clear();
     localStorage.setItem('sitama_app_version', APP_VERSION);
@@ -179,12 +179,6 @@
         </div>
 
         <div class="header-actions">
-          <!-- Landing Page Switcher Button -->
-          <button class="btn btn-outline" style="font-size:0.78rem; padding:5px 12px; color:#fff; border-color:rgba(255,255,255,0.3); display:inline-flex; align-items:center; gap:6px;" onclick="navigateTo('landing')">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-            Beranda Portal
-          </button>
-
           <!-- Quick Role Switcher Pill for 4 Account Levels -->
           <div class="role-pill">
             <span>${t('switchRole')}:</span>
