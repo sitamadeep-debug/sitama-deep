@@ -1957,17 +1957,18 @@
                   </button>
                 </form>
               ` : `
-                <!-- Simulated Webmail Inbox Card -->
-                <div class="email-simulator-box">
-                  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #E2E8F0; padding-bottom:8px; margin-bottom:8px; font-size:0.75rem; color:var(--text-muted);">
-                    <span>📨 Webmail SMKN Wonosalam</span>
-                    <span style="background:#FEF3C7; color:#B45309; font-weight:700; padding:2px 6px; border-radius:4px;">Email Masuk</span>
+                <!-- Real Email Delivery Notification Banner -->
+                <div style="background:#EFF6FF; border:1px solid #BFDBFE; border-left:4px solid #2563EB; padding:14px 16px; border-radius:8px; margin-bottom:20px; text-align:left;">
+                  <div style="font-weight:700; color:#1E40AF; font-size:0.92rem; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    Kode OTP Telah Dikirim ke Gmail!
                   </div>
-                  <div style="font-size:0.8rem; margin-bottom:2px;"><b>Dari:</b> noreply-sitama@smknwonosalam.sch.id</div>
-                  <div style="font-size:0.8rem; margin-bottom:2px;"><b>Kepada:</b> ${state.recoveryUser.email}</div>
-                  <div style="font-size:0.8rem; margin-bottom:6px;"><b>Subjek:</b> [SITAMA-DEEP] Kode Pemulihan Kata Sandi Akun ${state.recoveryUser.name}</div>
-                  <div style="font-size:0.8rem; color:var(--text-main);">Kode OTP Verifikasi:</div>
-                  <div class="otp-code-box">${state.recoveryOtpGenerated}</div>
+                  <div style="font-size:0.84rem; color:#1E3A8A; line-height:1.5;">
+                    Sistem telah mengirimkan 6 digit kode verifikasi pemulihan kata sandi ke: <b>${state.recoveryUser.email}</b>.
+                  </div>
+                  <div style="font-size:0.78rem; color:#475569; margin-top:8px;">
+                    💡 <i>Silakan periksa <b>Kotak Masuk (Inbox)</b> atau folder <b>Spam</b> di aplikasi Gmail Anda, lalu masukkan 6 digit kode OTP di bawah ini:</i>
+                  </div>
                 </div>
 
                 <!-- Reset Form -->
@@ -2459,11 +2460,36 @@
       return;
     }
 
-    const otpCode = 'DEEP-' + Math.floor(100000 + Math.random() * 900000);
+    const rawOtp = String(Math.floor(100000 + Math.random() * 900000));
     state.recoveryUser = user;
-    state.recoveryOtpGenerated = otpCode;
+    state.recoveryOtpGenerated = rawOtp;
     state.recoveryErrorMsg = '';
     state.recoverySuccessMsg = `Kode OTP pemulihan telah dikirim ke email: ${user.email}`;
+
+    // Kirim email OTP sungguhan ke inbox Gmail via EmailJS
+    if (typeof emailjs !== 'undefined') {
+      try {
+        emailjs.init('m5870uowXDjQGaXEb');
+        emailjs.send('service_n17kfit', 'template_kq9i466', {
+          to_email: user.email,
+          email: user.email,
+          to_name: user.name,
+          name: user.name,
+          passcode: rawOtp,
+          otp: rawOtp,
+          otp_code: rawOtp,
+          code: rawOtp,
+          message: rawOtp,
+          app_name: 'SITAMA-DEEP SMK Negeri Wonosalam'
+        }).then(
+          function (res) { console.log('✅ Email OTP terkirim ke Gmail:', res.status, res.text); },
+          function (err) { console.warn('⚠️ Gagal kirim email via EmailJS:', err); }
+        );
+      } catch (err) {
+        console.warn('EmailJS error:', err);
+      }
+    }
+
     renderApp();
   };
 
