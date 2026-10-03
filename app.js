@@ -4,7 +4,7 @@
 
 (function () {
   // Version Guard: Otomatis membersihkan cache localStorage jika versi aplikasi diperbarui
-  const APP_VERSION = '2026.10.02.v6';
+  const APP_VERSION = '2026.10.03.v7';
   if (localStorage.getItem('sitama_app_version') !== APP_VERSION) {
     localStorage.clear();
     localStorage.setItem('sitama_app_version', APP_VERSION);
@@ -28,7 +28,7 @@
     lang: getStoredData('lang', 'id'),
     currentUserId: getStoredData('currentUserId', 'USR-002'), // Default Sudarso, S.Pd. (Kepsek)
     currentRole: getStoredData('currentRole', 'principal'),
-    currentView: getStoredData('currentView', 'dashboard'),
+    currentView: getStoredData('currentView', 'landing'),
     selectedModuleId: getStoredData('selectedModuleId', 'MOD-001'),
     
     school: initialMockData.school,
@@ -147,6 +147,13 @@
   function renderApp() {
     const appEl = document.getElementById('app');
     
+    // Public Landing Page
+    if (state.currentView === 'landing') {
+      appEl.innerHTML = renderLandingPage();
+      bindLandingEvents();
+      return;
+    }
+
     // Auth Page (Login, New User, Forgot Password)
     if (state.currentView === 'login') {
       appEl.innerHTML = renderLoginPage();
@@ -172,6 +179,12 @@
         </div>
 
         <div class="header-actions">
+          <!-- Landing Page Switcher Button -->
+          <button class="btn btn-outline" style="font-size:0.78rem; padding:5px 12px; color:#fff; border-color:rgba(255,255,255,0.3); display:inline-flex; align-items:center; gap:6px;" onclick="navigateTo('landing')">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            Beranda Portal
+          </button>
+
           <!-- Quick Role Switcher Pill for 4 Account Levels -->
           <div class="role-pill">
             <span>${t('switchRole')}:</span>
@@ -270,6 +283,7 @@
       items.push({ view: 'modules', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>', label: t('menuMyModules') });
     }
 
+    items.unshift({ view: 'landing', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>', label: 'Beranda / Landing Page' });
     items.push({ view: 'profile', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>', label: t('menuProfile') });
     items.push({ view: 'login', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>', label: t('logout') });
 
@@ -1791,11 +1805,631 @@
     `;
   }
 
+  /* ------------------- OFFICIAL PUBLIC LANDING PAGE (GEMPITA 2026) ------------------- */
+  function renderLandingPage() {
+    const isEn = state.lang === 'en';
+    
+    return `
+      <div class="landing-page">
+        <!-- Ambient Background Glows -->
+        <div class="landing-glow-1"></div>
+        <div class="landing-glow-2"></div>
+
+        <!-- 1. STICKY TOP NAVIGATION -->
+        <header class="landing-nav">
+          <div class="landing-nav-brand" onclick="navigateTo('landing'); window.scrollTo({top:0, behavior:'smooth'});">
+            <img src="${state.school.logo}" alt="Logo SMKN Wonosalam" onerror="this.src='logo.png'"/>
+            <div class="landing-brand-text">
+              <div class="landing-brand-title">
+                SITAMA-DEEP
+                <span class="landing-brand-badge">GEMPITA 2026</span>
+              </div>
+              <div class="landing-brand-sub">SMK Negeri Wonosalam • Cabdin Jombang</div>
+            </div>
+          </div>
+
+          <ul class="landing-nav-links">
+            <li><a onclick="window.scrollTo({top:0, behavior:'smooth'})">${isEn ? 'Home' : 'Beranda'}</a></li>
+            <li><a onclick="scrollToLandingSection('deep-learning-section')">${isEn ? 'Deep Learning' : 'Deep Learning'}</a></li>
+            <li><a onclick="scrollToLandingSection('ekosistem-section')">${isEn ? '4 Account Roles' : '4 Tingkatan Akun'}</a></li>
+            <li><a onclick="scrollToLandingSection('rubrik-section')">${isEn ? '47 Indicators' : '47 Indikator'}</a></li>
+            <li><a onclick="scrollToLandingSection('dokumen-section')">${isEn ? 'Official Docs' : 'Dokumen Cetak'}</a></li>
+            <li><a onclick="scrollToLandingSection('inovator-section')">${isEn ? 'Innovator' : 'Inovator'}</a></li>
+          </ul>
+
+          <div class="landing-nav-actions">
+            <!-- Language Switcher -->
+            <button class="landing-btn landing-btn-outline landing-btn-sm" onclick="toggleLandingLang()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"></path></svg>
+              ${state.lang.toUpperCase()}
+            </button>
+
+            <!-- Dashboard Button -->
+            <button class="landing-btn landing-btn-secondary landing-btn-sm" onclick="navigateTo('dashboard')">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              ${isEn ? 'Demo App' : 'Buka Dashboard'}
+            </button>
+
+            <!-- Portal Login Button -->
+            <button class="landing-btn landing-btn-primary landing-btn-sm" onclick="navigateTo('login')">
+              ${isEn ? 'Sign In / Register →' : 'Masuk Portal →'}
+            </button>
+          </div>
+        </header>
+
+        <!-- 2. HERO SECTION -->
+        <section class="landing-hero" id="hero">
+          <div class="landing-hero-left">
+            <div class="landing-pill">
+              <span>🏅</span>
+              <span>${isEn ? 'GEMPITA 2026 Best Practice Innovation • Cabdin Jombang' : 'Inovasi Praktik Baik GEMPITA 2026 • Cabdin Jombang'}</span>
+            </div>
+
+            <h1 class="landing-hero-title">
+              ${isEn 
+                ? 'Standardized Teaching Module Review Based on <span class="landing-gradient-text">Deep Learning</span>' 
+                : 'Sistem Informasi Telaah Modul Ajar Berbasis <span class="landing-gradient-text">Pembelajaran Mendalam</span>'}
+            </h1>
+
+            <p class="landing-hero-desc">
+              ${isEn
+                ? 'Digital quality assurance platform for instructional planning at SMK Negeri Wonosalam. Connecting Principals, Curriculum Coordinators, Vocational Teachers, and Administrative Staff with 47 standardized Deep Learning indicators (Mindful, Meaningful, Joyful).'
+                : 'Platform digital penjaminan mutu perencanaan pembelajaran di SMK Negeri Wonosalam. Menghubungkan Kepala Sekolah, Waka Kurikulum, Guru Pengampu Kejuruan, dan Tenaga Kependidikan dalam ekosistem telaah terstandar 47 Indikator Deep Learning (Mindful, Meaningful, Joyful).'}
+            </p>
+
+            <div class="landing-cta-row">
+              <button class="landing-btn landing-btn-primary" onclick="navigateTo('login')">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+                ${isEn ? 'Open Official Portal / Login' : 'Masuk ke Aplikasi Portal'}
+              </button>
+
+              <button class="landing-btn landing-btn-secondary" onclick="navigateTo('dashboard')">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                ${isEn ? 'Explore Live Dashboard' : 'Eksplorasi Demo Dashboard'}
+              </button>
+
+              <button class="landing-btn landing-btn-outline" onclick="scrollToLandingSection('rubrik-section')">
+                📋 ${isEn ? '47 Indicators' : 'Lihat 47 Indikator'}
+              </button>
+            </div>
+
+            <!-- Quick Demo Role Launcher Chips -->
+            <div class="landing-quick-roles">
+              <div class="landing-quick-roles-label">
+                ⚡ ${isEn ? 'Instant Demo - Click to enter as any role:' : 'Uji coba langsung tanpa instalasi (Pilih salah satu peran):'}
+              </div>
+              <div class="landing-chips-container">
+                <button class="landing-role-chip" onclick="quickLogin('USR-002')">👔 2. Kepsek (Sudarso, S.Pd.)</button>
+                <button class="landing-role-chip" onclick="quickLogin('USR-002B')">👔 2. Waka (Drs. Bambang)</button>
+                <button class="landing-role-chip" onclick="quickLogin('USR-003')">👨‍🏫 3. Guru ATP (Budi)</button>
+                <button class="landing-role-chip" onclick="quickLogin('USR-004')">🍳 3. Guru Kuliner (Dewi)</button>
+                <button class="landing-role-chip" onclick="quickLogin('USR-008')">📋 4. Tendik / TU (Tri)</button>
+                <button class="landing-role-chip" onclick="quickLogin('USR-001')">🛠️ 1. Admin (Siti)</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hero Right Preview Card -->
+          <div class="landing-hero-card">
+            <div class="landing-card-header">
+              <div class="landing-card-title">
+                <svg width="18" height="18" fill="none" stroke="#38BDF8" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Hasil Telaah Modul Ajar (Live)
+              </div>
+              <span class="landing-status-badge">✓ SANGAT LAYAK (A)</span>
+            </div>
+
+            <div style="font-size:0.88rem; color:#FFFFFF; font-weight:700; margin-bottom:4px;">
+              Pengolahan Tanah & Penanaman Kelapa Sawit
+            </div>
+            <div style="font-size:0.78rem; color:#94A3B8; margin-bottom:14px;">
+              Budi Santoso, S.Pd. • Agribisnis Tanaman Perkebunan (ATP) • Fase E
+            </div>
+
+            <div class="landing-score-banner">
+              <div>
+                <div class="landing-score-num">173 <span style="font-size:1.1rem; color:#93C5FD; font-weight:600;">/ 188</span></div>
+                <div class="landing-score-sub">Skor Kumulatif 47 Indikator Telaah</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:1.6rem; font-weight:800; color:#34D399;">92%</div>
+                <div style="font-size:0.75rem; color:#6EE7B7;">Predikat Sangat Layak</div>
+              </div>
+            </div>
+
+            <div class="landing-preview-metrics">
+              <div class="landing-metric-box">
+                <div class="landing-metric-val" style="color:#38BDF8;">92%</div>
+                <div class="landing-metric-lbl">🧠 Mindful</div>
+              </div>
+              <div class="landing-metric-box">
+                <div class="landing-metric-val" style="color:#34D399;">95%</div>
+                <div class="landing-metric-lbl">💡 Meaningful</div>
+              </div>
+              <div class="landing-metric-box">
+                <div class="landing-metric-val" style="color:#FBBF24;">85%</div>
+                <div class="landing-metric-lbl">🌟 Joyful</div>
+              </div>
+            </div>
+
+            <div style="font-size:0.76rem; color:#CBD5E1; border-top:1px solid rgba(255,255,255,0.06); padding-top:12px; display:flex; justify-content:space-between; align-items:center;">
+              <span>Penelaah: <b>Sudarso, S.Pd.</b> (Kepala Sekolah)</span>
+              <span style="color:#38BDF8; font-weight:600;">Tervalidasi Digital ✓</span>
+            </div>
+
+            <button class="landing-btn landing-btn-secondary landing-btn-sm" style="width:100%; margin-top:14px;" onclick="navigateTo('dashboard')">
+              Buka Lembar Telaah Lengkap di Dashboard →
+            </button>
+          </div>
+        </section>
+
+        <!-- 3. STATS COUNTER RIBBON -->
+        <section class="landing-stats-section">
+          <div class="landing-stats-grid">
+            <div class="landing-stat-box">
+              <div class="landing-stat-number">47</div>
+              <div class="landing-stat-title">Indikator Telaah Baku</div>
+              <div class="landing-stat-desc">Rubrik terpadu Deep Learning</div>
+            </div>
+            <div class="landing-stat-box">
+              <div class="landing-stat-number">188</div>
+              <div class="landing-stat-title">Poin Skor Maksimal</div>
+              <div class="landing-stat-desc">Skala kelayakan terstandar</div>
+            </div>
+            <div class="landing-stat-box">
+              <div class="landing-stat-number">4</div>
+              <div class="landing-stat-title">Tingkatan Akun Terpadu</div>
+              <div class="landing-stat-desc">Admin, Kepsek, Guru, Tendik</div>
+            </div>
+            <div class="landing-stat-box">
+              <div class="landing-stat-number">100%</div>
+              <div class="landing-stat-title">Berbasis Cloud & Digital</div>
+              <div class="landing-stat-desc">Arsip otomatis & audit trail</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. FILOSOFI DEEP LEARNING (3 PILAR) -->
+        <section class="landing-section" id="deep-learning-section">
+          <div class="landing-section-header">
+            <span class="landing-section-badge">FONDASI PEDAGOGIS GEMPITA 2026</span>
+            <h2 class="landing-section-title">3 Pilar Pembelajaran Mendalam (Deep Learning)</h2>
+            <p class="landing-section-desc">
+              Pergeseran supervisi dari sekadar kepatuhan administrasi menjadi penguatan esensi pembelajaran yang mengakar pada peserta didik.
+            </p>
+          </div>
+
+          <div class="landing-pilar-grid">
+            <!-- Pilar 1: Mindful -->
+            <div class="landing-pilar-card mindful">
+              <div class="landing-pilar-icon">🧠</div>
+              <h3 class="landing-pilar-title">Mindful Learning</h3>
+              <div style="font-size:0.8rem; color:#38BDF8; font-weight:700; margin-bottom:8px;">Pembelajaran Berkesadaran Penuh</div>
+              <p class="landing-pilar-desc">
+                Membangun fokus kognitif, keterlibatan aktif, dan kesadaran tujuan belajar agar murid memahami mengapa materi tersebut bermakna bagi kehidupannya.
+              </p>
+              <ul class="landing-pilar-points">
+                <li><svg width="14" height="14" fill="none" stroke="#38BDF8" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Perumusan Alur Tujuan Pembelajaran (ATP) eksplisit dan terukur</li>
+                <li><svg width="14" height="14" fill="none" stroke="#38BDF8" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Pembiasaan refleksi awal, proses, dan metakognisi peserta didik</li>
+                <li><svg width="14" height="14" fill="none" stroke="#38BDF8" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Asesmen diagnostik non-kognitif dan pemetaan kesiapan belajar</li>
+              </ul>
+            </div>
+
+            <!-- Pilar 2: Meaningful -->
+            <div class="landing-pilar-card meaningful">
+              <div class="landing-pilar-icon">💡</div>
+              <h3 class="landing-pilar-title">Meaningful Learning</h3>
+              <div style="font-size:0.8rem; color:#34D399; font-weight:700; margin-bottom:8px;">Pembelajaran Bermakna & Relevan</div>
+              <p class="landing-pilar-desc">
+                Menghubungkan konsep teoritis dengan konteks dunia kerja kejuruan (DUDIKA), pemecahan masalah riil di masyarakat, dan penguatan karakter luhur.
+              </p>
+              <ul class="landing-pilar-points">
+                <li><svg width="14" height="14" fill="none" stroke="#34D399" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Keselarasan materi kejuruan dengan Standar Industri Kerja (DUDIKA)</li>
+                <li><svg width="14" height="14" fill="none" stroke="#34D399" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Pembelajaran berbasis tantangan riil (Problem & Project-Based Learning)</li>
+                <li><svg width="14" height="14" fill="none" stroke="#34D399" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Pengintegrasian Profil Pelajar Pancasila dan budaya mutu kerja</li>
+              </ul>
+            </div>
+
+            <!-- Pilar 3: Joyful -->
+            <div class="landing-pilar-card joyful">
+              <div class="landing-pilar-icon">🌟</div>
+              <h3 class="landing-pilar-title">Joyful Learning</h3>
+              <div style="font-size:0.8rem; color:#FBBF24; font-weight:700; margin-bottom:8px;">Pembelajaran Menyenangkan & Menggugah</div>
+              <p class="landing-pilar-desc">
+                Menciptakan ruang belajar yang memerdekakan, kolaboratif, memicu rasa ingin tahu, dan memberikan apresiasi atas setiap proses kreasi peserta didik.
+              </p>
+              <ul class="landing-pilar-points">
+                <li><svg width="14" height="14" fill="none" stroke="#FBBF24" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Iklim interaksi yang aman, saling menghargai, dan tanpa intimidasi</li>
+                <li><svg width="14" height="14" fill="none" stroke="#FBBF24" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Diferensiasi proses dan produk belajar sesuai minat peserta didik</li>
+                <li><svg width="14" height="14" fill="none" stroke="#FBBF24" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Umpan balik apresiatif dan perayaan karya kejuruan peserta didik</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. EKOSISTEM 4 TINGKATAN AKUN -->
+        <section class="landing-section" id="ekosistem-section" style="background: rgba(16, 31, 66, 0.25); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <div class="landing-section-header">
+            <span class="landing-section-badge">KOLABORASI MULTI-PERAN</span>
+            <h2 class="landing-section-title">Sinergi 4 Tingkatan Akun Sekolah</h2>
+            <p class="landing-section-desc">
+              SITAMA-DEEP mengintegrasikan seluruh lini organisasi sekolah ke dalam alur kerja digital yang terpadu, transparan, dan teratur.
+            </p>
+          </div>
+
+          <div class="landing-ecosystem-grid">
+            <!-- Level 1: Admin -->
+            <div class="landing-role-card">
+              <div>
+                <div class="landing-role-top">
+                  <span class="landing-role-badge">Level 1 • Tata Kelola</span>
+                  <span style="font-size:0.75rem; color:#94A3B8;">Akses Penuh</span>
+                </div>
+                <div class="landing-role-header">
+                  <div class="landing-role-icon">🛠️</div>
+                  <div>
+                    <div class="landing-role-name">Administrator Sistem</div>
+                    <div class="landing-role-person">Siti Rahmawati, S.Kom.</div>
+                  </div>
+                </div>
+                <p class="landing-role-desc">
+                  Mengelola keamanan sistem, manajemen akun pengguna, pengaturan master data rombel/mapel, rubrik 47 indikator, dan audit log jejak aktivitas real-time.
+                </p>
+                <ul class="landing-role-features">
+                  <li><svg width="14" height="14" fill="none" stroke="#10B981" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Manajemen 4 Level Pengguna & Reset Sandi Mandiri</li>
+                  <li><svg width="14" height="14" fill="none" stroke="#10B981" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Sinkronisasi Cloud Database Supabase & Audit Trail</li>
+                  <li><svg width="14" height="14" fill="none" stroke="#10B981" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Konfigurasi Rubrik & Skala Kelayakan Kedinasan</li>
+                </ul>
+              </div>
+              <button class="landing-btn landing-btn-secondary landing-btn-sm" style="width:100%;" onclick="quickLogin('USR-001')">
+                Masuk sebagai Admin Sistem →
+              </button>
+            </div>
+
+            <!-- Level 2: Kepsek & Waka -->
+            <div class="landing-role-card" style="border-color: rgba(37, 99, 235, 0.4); background: rgba(37, 99, 235, 0.08);">
+              <div>
+                <div class="landing-role-top">
+                  <span class="landing-role-badge" style="background:#2563EB; color:#fff;">Level 2 • Kepemimpinan</span>
+                  <span style="font-size:0.75rem; color:#93C5FD;">Penelaah & Pengesah</span>
+                </div>
+                <div class="landing-role-header">
+                  <div class="landing-role-icon" style="background:rgba(37,99,235,0.4);">👔</div>
+                  <div>
+                    <div class="landing-role-name">Kepala Sekolah & Waka</div>
+                    <div class="landing-role-person">Sudarso, S.Pd. & Drs. Bambang Supriyadi</div>
+                  </div>
+                </div>
+                <p class="landing-role-desc">
+                  Melakukan penelaahan digital interaktif 47 butir indikator, skoring otomatis /188, analisis radar chart 6 dimensi, pemberian umpan balik kualitatif, dan pengesahan resmi.
+                </p>
+                <ul class="landing-role-features">
+                  <li><svg width="14" height="14" fill="none" stroke="#10B981" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Instrumen Telaah Interaktif 47 Indikator & Preset Cepat</li>
+                  <li><svg width="14" height="14" fill="none" stroke="#10B981" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Radar Chart Capaian & Rekomendasi Supervisi Guru</li>
+                  <li><svg width="14" height="14" fill="none" stroke="#10B981" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Pengesahan Digital & Penerbitan Lembar Telaah Resmi</li>
+                </ul>
+              </div>
+              <button class="landing-btn landing-btn-primary landing-btn-sm" style="width:100%;" onclick="quickLogin('USR-002')">
+                Masuk sebagai Kepala Sekolah →
+              </button>
+            </div>
+
+            <!-- Level 3: Guru -->
+            <div class="landing-role-card">
+              <div>
+                <div class="landing-role-top">
+                  <span class="landing-role-badge">Level 3 • Praktisi Ajar</span>
+                  <span style="font-size:0.75rem; color:#94A3B8;">Penyusun Modul</span>
+                </div>
+                <div class="landing-role-header">
+                  <div class="landing-role-icon">👨‍🏫</div>
+                  <div>
+                    <div class="landing-role-name">Guru Pengampu Kejuruan / Mapel</div>
+                    <div class="landing-role-person">Budi Santoso, Dewi Lestari, Ahmad Fauzi, dkk.</div>
+                  </div>
+                </div>
+                <p class="landing-role-desc">
+                  Mengunggah modul ajar PDF sesuai fase/TP, melihat rincian skor per indikator secara transparan, serta mengunggah perbaikan modul bertingkat (v1 → v2).
+                </p>
+                <ul class="landing-role-features">
+                  <li><svg width="14" height="14" fill="none" stroke="#10B981" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Form Unggah Modul Terpadu Fase, CP/TP & Lampiran</li>
+                  <li><svg width="14" height="14" fill="none" stroke="#10B981" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Transparansi Nilai 47 Butir & Catatan Umpan Balik Pimpinan</li>
+                  <li><svg width="14" height="14" fill="none" stroke="#10B981" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Alur Revisi Berkelanjutan dengan Riwayat Versi Aman</li>
+                </ul>
+              </div>
+              <button class="landing-btn landing-btn-secondary landing-btn-sm" style="width:100%;" onclick="quickLogin('USR-003')">
+                Masuk sebagai Guru Pengampu →
+              </button>
+            </div>
+
+            <!-- Level 4: Tendik / TU -->
+            <div class="landing-role-card">
+              <div>
+                <div class="landing-role-top">
+                  <span class="landing-role-badge">Level 4 • Administrasi Mutu</span>
+                  <span style="font-size:0.75rem; color:#94A3B8;">Buku Kendali & Arsip</span>
+                </div>
+                <div class="landing-role-header">
+                  <div class="landing-role-icon">📋</div>
+                  <div>
+                    <div class="landing-role-name">Tendik / Tata Usaha (Arsip Kurikulum)</div>
+                    <div class="landing-role-person">Tri Wahyuni, S.AP.</div>
+                  </div>
+                </div>
+                <p class="landing-role-desc">
+                  Mencatat berkas di Buku Kendali Kurikulum, memverifikasi kelengkapan fisik di rak arsip, menerbitkan kode registrasi resmi, dan mencetak tanda terima.
+                </p>
+                <ul class="landing-role-features">
+                  <li><svg width="14" height="14" fill="none" stroke="#10B981" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Buku Kendali & Register Arsip Kurikulum Sekolah</li>
+                  <li><svg width="14" height="14" fill="none" stroke="#10B981" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Verifikasi Berkas Fisik & Lokasi Rak Lemari Dokumen</li>
+                  <li><svg width="14" height="14" fill="none" stroke="#10B981" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Cetak Tanda Terima Penyerahan Berkas Kedinasan</li>
+                </ul>
+              </div>
+              <button class="landing-btn landing-btn-secondary landing-btn-sm" style="width:100%;" onclick="quickLogin('USR-008')">
+                Masuk sebagai Tendik / TU →
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. INSTRUMEN TELAAH 47 INDIKATOR & 6 DIMENSI -->
+        <section class="landing-section" id="rubrik-section">
+          <div class="landing-section-header">
+            <span class="landing-section-badge">INSTRUMEN SUPERVISI BAKU</span>
+            <h2 class="landing-section-title">47 Indikator Rubrik Telaah Deep Learning</h2>
+            <p class="landing-section-desc">
+              Instrumen evaluasi terstruktur yang mencakup 6 dimensi penjaminan mutu perencanaan ajar dengan skor maksimal 188 poin.
+            </p>
+          </div>
+
+          <div class="landing-rubric-box">
+            <div class="landing-dimensions-grid">
+              <div class="landing-dim-card">
+                <div class="landing-dim-code">DIMENSI A</div>
+                <div class="landing-dim-title">Identitas & Kelengkapan Modul</div>
+                <div class="landing-dim-count">5 Indikator • Alokasi waktu, CP/TP, kelengkapan komponen</div>
+              </div>
+              <div class="landing-dim-card">
+                <div class="landing-dim-code">DIMENSI B</div>
+                <div class="landing-dim-title">Kesesuaian Tujuan Pembelajaran</div>
+                <div class="landing-dim-count">5 Indikator • Berpikir tingkat tinggi (HOTS), karakter, vokasi</div>
+              </div>
+              <div class="landing-dim-card">
+                <div class="landing-dim-code">DIMENSI C</div>
+                <div class="landing-dim-title">Pembelajaran Berkesadaran (Mindful)</div>
+                <div class="landing-dim-count">5 Indikator • Fokus, metakognisi, pemetaan kesiapan belajar</div>
+              </div>
+              <div class="landing-dim-card">
+                <div class="landing-dim-code">DIMENSI D</div>
+                <div class="landing-dim-title">Pembelajaran Bermakna (Meaningful)</div>
+                <div class="landing-dim-count">5 Indikator • Konteks nyata industri, problem solving, P5</div>
+              </div>
+              <div class="landing-dim-card">
+                <div class="landing-dim-code">DIMENSI E</div>
+                <div class="landing-dim-title">Pembelajaran Menyenangkan (Joyful)</div>
+                <div class="landing-dim-count">5 Indikator • Iklim inklusif, diferensiasi, antusiasme karya</div>
+              </div>
+              <div class="landing-dim-card">
+                <div class="landing-dim-code">DIMENSI F - J</div>
+                <div class="landing-dim-title">Desain Aktivitas, Asesmen & Refleksi</div>
+                <div class="landing-dim-count">22 Indikator • Pemanfaatan TIK, asesmen otentik, tindak lanjut</div>
+              </div>
+            </div>
+
+            <!-- 5 Kategori Kelayakan -->
+            <div style="font-size:0.84rem; font-weight:700; color:#FFFFFF; margin-bottom:12px;">
+              Skala Predikat Kelayakan Resmi:
+            </div>
+            <div class="landing-bands-row">
+              <div class="landing-band-pill" style="background:rgba(16,185,129,0.18); border:1px solid rgba(16,185,129,0.4); color:#34D399;">
+                <span style="font-size:1rem;">🟢</span>
+                <span>86% - 100%: <b>Sangat Layak (A)</b></span>
+              </div>
+              <div class="landing-band-pill" style="background:rgba(59,130,246,0.18); border:1px solid rgba(59,130,246,0.4); color:#60A5FA;">
+                <span style="font-size:1rem;">🔵</span>
+                <span>76% - 85%: <b>Layak (B)</b></span>
+              </div>
+              <div class="landing-band-pill" style="background:rgba(139,92,246,0.18); border:1px solid rgba(139,92,246,0.4); color:#A78BFA;">
+                <span style="font-size:1rem;">🟣</span>
+                <span>61% - 75%: <b>Layak Dg Revisi (C)</b></span>
+              </div>
+              <div class="landing-band-pill" style="background:rgba(245,158,11,0.18); border:1px solid rgba(245,158,11,0.4); color:#FBBF24;">
+                <span style="font-size:1rem;">🟡</span>
+                <span>51% - 60%: <b>Perlu Revisi (D)</b></span>
+              </div>
+              <div class="landing-band-pill" style="background:rgba(239,68,68,0.18); border:1px solid rgba(239,68,68,0.4); color:#F87171;">
+                <span style="font-size:1rem;">🔴</span>
+                <span>0% - 50%: <b>Belum Layak (E)</b></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. DOKUMEN KEDINASAN SIAP CETAK -->
+        <section class="landing-section" id="dokumen-section" style="background: rgba(16, 31, 66, 0.2); border-top:1px solid rgba(255,255,255,0.05); border-bottom:1px solid rgba(255,255,255,0.05);">
+          <div class="landing-section-header">
+            <span class="landing-section-badge">STANDARISASI ADMINISTRASI RESMI</span>
+            <h2 class="landing-section-title">Dokumen Kedinasan Otomatis (Print-Ready)</h2>
+            <p class="landing-section-desc">
+              Sistem secara otomatis mengompilasi lembar administrasi resmi siap cetak (A4 / F4) sesuai format baku Cabdin Pendidikan Wilayah Jombang.
+            </p>
+          </div>
+
+          <div class="landing-doc-grid">
+            <div class="landing-doc-card">
+              <span class="landing-doc-badge">Dokumen 1 • Kepala Sekolah</span>
+              <h3 class="landing-doc-title">Lembar Hasil Telaah Modul</h3>
+              <p class="landing-doc-desc">
+                Memuat kop resmi SMKN Wonosalam, identitas modul, tabel skor 47 indikator, persentase nilai, catatan pembinaan, dan kolom tanda tangan pengesahan.
+              </p>
+              <div class="landing-doc-specs">
+                🖨️ Format: Cetak A4 / PDF Legal • Tanda Tangan & NIP
+              </div>
+            </div>
+
+            <div class="landing-doc-card">
+              <span class="landing-doc-badge">Dokumen 2 • Bagian Tata Usaha</span>
+              <h3 class="landing-doc-title">Buku Kendali Register Arsip</h3>
+              <p class="landing-doc-desc">
+                Buku register resmi penatausahaan modul ajar kurikulum dengan penomoran unik, identitas penyusun, tanggal verifikasi fisik, dan paraf petugas TU.
+              </p>
+              <div class="landing-doc-specs">
+                🖨️ Format: Buku Register Penyerahan Dokumen Kurikulum
+              </div>
+            </div>
+
+            <div class="landing-doc-card">
+              <span class="landing-doc-badge">Dokumen 3 • Pengarsipan Mutu</span>
+              <h3 class="landing-doc-title">Tanda Terima Berkas Fisik</h3>
+              <p class="landing-doc-desc">
+                Bukti tanda terima serah terima dokumen fisik modul ajar yang diverifikasi di lemari/rak arsip kurikulum untuk penjaminan mutu ISO sekolah.
+              </p>
+              <div class="landing-doc-specs">
+                🖨️ Format: Lembar Tanda Terima Penyerahan Berkas Cetak
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 8. PROFIL INOVATOR GEMPITA 2026 -->
+        <section class="landing-section" id="inovator-section">
+          <div class="landing-innovator-card">
+            <div class="landing-innovator-avatar">
+              👔
+            </div>
+            <div>
+              <div class="landing-innovator-name">Sudarso, S.Pd.</div>
+              <div class="landing-innovator-title">Kepala SMK Negeri Wonosalam, Kabupaten Jombang</div>
+              
+              <blockquote class="landing-innovator-quote">
+                "Supervisi akademik di era Pembelajaran Mendalam (Deep Learning) bukan semata instrumen evaluatif administratif, melainkan jembatan dialog pedagogis yang memuliakan martabat dan menumbuhkan profesionalisme guru untuk melahirkan murid-murid unggul berkarakter."
+              </blockquote>
+
+              <div class="landing-innovator-meta">
+                <span>🏫 <b>Satuan Pendidikan:</b> SMK Negeri Wonosalam (NPSN: 20503412)</span>
+                <span>🏛️ <b>Wilayah:</b> Cabang Dinas Pendidikan Kab. Jombang</span>
+                <span>🏅 <b>Naskah:</b> Praktik Baik Kepemimpinan GEMPITA 2026</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 9. LIVE SANDBOX CTA -->
+        <section class="landing-sandbox-section" id="sandbox-section">
+          <div class="landing-sandbox-box">
+            <span class="landing-section-badge">AKSES CEPAT INTERAKTIF</span>
+            <h2 class="landing-section-title" style="font-size:2.4rem; margin-bottom:14px;">
+              Siap Menguatkan Perencanaan Pembelajaran?
+            </h2>
+            <p class="landing-section-desc" style="margin-bottom:28px;">
+              Gunakan akun Anda untuk memulai proses penelaahan atau coba simulasi langsung menggunakan salah satu akun demo berikut:
+            </p>
+
+            <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-bottom:28px;">
+              <button class="landing-btn landing-btn-primary" onclick="quickLogin('USR-002')">
+                Masuk sebagai Kepala Sekolah (Sudarso)
+              </button>
+              <button class="landing-btn landing-btn-secondary" onclick="quickLogin('USR-003')">
+                Masuk sebagai Guru ATP (Budi)
+              </button>
+              <button class="landing-btn landing-btn-secondary" onclick="quickLogin('USR-008')">
+                Masuk sebagai Tendik / TU (Tri)
+              </button>
+              <button class="landing-btn landing-btn-secondary" onclick="quickLogin('USR-001')">
+                Masuk sebagai Administrator (Siti)
+              </button>
+            </div>
+
+            <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap;">
+              <button class="landing-btn landing-btn-outline" onclick="navigateTo('login')">
+                🔑 Halaman Masuk Akun Dinas
+              </button>
+              <button class="landing-btn landing-btn-outline" onclick="navigateTo('login'); setTimeout(()=>{ if (window.setAuthTab) setAuthTab('register'); }, 50);">
+                ✍️ Registrasi Guru / Tendik Baru
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 10. FOOTER -->
+        <footer class="landing-footer">
+          <div class="landing-footer-grid">
+            <div>
+              <div class="landing-footer-brand-title">SITAMA-DEEP • GEMPITA 2026</div>
+              <p class="landing-footer-sub">
+                Sistem Informasi Telaah Modul Ajar untuk Pembelajaran Mendalam (Deep Learning) — Inovasi Kepemimpinan Pembelajaran Sudarso, S.Pd., Kepala SMK Negeri Wonosalam, Kab. Jombang, Jawa Timur.
+              </p>
+              <div style="font-size:0.8rem; line-height:1.6; color:#94A3B8;">
+                📍 <b>Alamat Kampus:</b> Jl. Anjasmoro, Dsn. Pucangrejo, Ds. Wonosalam, Kec. Wonosalam, Kab. Jombang, Jawa Timur 61476<br/>
+                📞 <b>Telepon / Kontak:</b> +62 815-1594-0188 | ✉️ <b>Email:</b> smkn.wonosalam.jbg@gmail.com
+              </div>
+            </div>
+
+            <div class="landing-footer-col">
+              <h4>Navigasi Pintas</h4>
+              <ul class="landing-footer-links">
+                <li><a onclick="window.scrollTo({top:0, behavior:'smooth'})">Beranda Portal</a></li>
+                <li><a onclick="scrollToLandingSection('deep-learning-section')">Filosofi Deep Learning</a></li>
+                <li><a onclick="scrollToLandingSection('ekosistem-section')">Sinergi 4 Tingkatan Akun</a></li>
+                <li><a onclick="scrollToLandingSection('rubrik-section')">Instrumen 47 Indikator</a></li>
+                <li><a onclick="scrollToLandingSection('dokumen-section')">Dokumen Siap Cetak</a></li>
+                <li><a onclick="scrollToLandingSection('inovator-section')">Profil Inovator GEMPITA</a></li>
+              </ul>
+            </div>
+
+            <div class="landing-footer-col">
+              <h4>Konsentrasi Keahlian</h4>
+              <ul class="landing-footer-links">
+                <li><a onclick="navigateTo('dashboard')">Agribisnis Tanaman Perkebunan (ATP)</a></li>
+                <li><a onclick="navigateTo('dashboard')">Kuliner / Tata Boga</a></li>
+                <li><a onclick="navigateTo('dashboard')">Teknik Kendaraan Ringan (TKR)</a></li>
+                <li><a onclick="navigateTo('dashboard')">Teknik Pemesinan (TPM)</a></li>
+                <li><a onclick="navigateTo('dashboard')">Mata Pelajaran Umum & IPAS</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="landing-footer-bottom">
+            <div>
+              SITAMA-DEEP © 2026 SMK Negeri Wonosalam. Naskah Praktik Baik GEMPITA 2026. Hak Cipta Dilindungi.
+            </div>
+            <div>
+              Pemerintah Provinsi Jawa Timur • Dinas Pendidikan • Cabang Dinas Pendidikan Kab. Jombang
+            </div>
+          </div>
+        </footer>
+      </div>
+    `;
+  }
+
+  function bindLandingEvents() {
+    // Landing page bindings
+  }
+
+  window.scrollToLandingSection = function (id) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  window.toggleLandingLang = function () {
+    state.lang = state.lang === 'id' ? 'en' : 'id';
+    saveState();
+    renderApp();
+  };
+
   /* ------------------- 3-TAB AUTHENTICATION (MATCHING GAMBAR 1 + NEW USER + RECOVERY) ------------------- */
   function renderLoginPage() {
     return `
       <div class="auth-wrapper">
         <div class="auth-card">
+          <div style="text-align:left; margin-bottom:14px;">
+            <a href="javascript:void(0)" onclick="navigateTo('landing')" style="font-size:0.82rem; color:var(--primary-blue); text-decoration:none; display:inline-flex; align-items:center; gap:5px; font-weight:600;">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+              Kembali ke Beranda Portal
+            </a>
+          </div>
           <img src="${state.school.logo}" alt="Logo SMKN Wonosalam" style="height:76px; margin-bottom:12px; filter:drop-shadow(0 2px 6px rgba(0,0,0,0.15));"/>
           <h1 style="font-size:1.6rem; font-weight:800; color:var(--primary-dark); margin-bottom:2px; letter-spacing:-0.02em;">${t('appName')}</h1>
           <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:20px;">${t('loginSubtitle')}</p>
