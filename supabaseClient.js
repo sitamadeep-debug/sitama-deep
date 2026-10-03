@@ -4,7 +4,7 @@
 (function () {
   // Config defaults: Proyek Supabase Resmi SMKN Wonosalam GEMPITA 2026
   const DEFAULT_SUPABASE_URL = "https://tcoivgttsiykzrubqpnr.supabase.co";
-  const DEFAULT_SUPABASE_ANON_KEY = "";
+  const DEFAULT_SUPABASE_ANON_KEY = "sb_publishable__sPuxaKqh57Y9gGCl8Jy1g_3xaqvQJY";
 
   function normalizeUrl(url) {
     if (!url) return '';
