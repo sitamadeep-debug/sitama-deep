@@ -4,7 +4,7 @@
 
 (function () {
   // Version Guard: Otomatis membersihkan cache localStorage jika versi aplikasi diperbarui
-  const APP_VERSION = '2026.10.03.v8';
+  const APP_VERSION = '2026.10.03.v9';
   if (localStorage.getItem('sitama_app_version') !== APP_VERSION) {
     localStorage.clear();
     localStorage.setItem('sitama_app_version', APP_VERSION);
@@ -1811,7 +1811,7 @@
 
         <!-- 1. STICKY TOP NAVIGATION -->
         <header class="landing-nav">
-          <div class="landing-nav-brand" onclick="navigateTo('landing'); window.scrollTo({top:0, behavior:'smooth'});">
+          <div class="landing-nav-brand" onclick="scrollToLandingTop()" title="Kembali ke Atas Beranda">
             <img src="${state.school.logo}" alt="Logo SMKN Wonosalam" onerror="this.src='logo.png'"/>
             <div class="landing-brand-text">
               <div class="landing-brand-title">
@@ -1823,30 +1823,29 @@
           </div>
 
           <ul class="landing-nav-links">
-            <li><a onclick="window.scrollTo({top:0, behavior:'smooth'})">${isEn ? 'Home' : 'Beranda'}</a></li>
-            <li><a onclick="scrollToLandingSection('deep-learning-section')">${isEn ? 'Deep Learning' : 'Deep Learning'}</a></li>
-            <li><a onclick="scrollToLandingSection('ekosistem-section')">${isEn ? '4 Account Roles' : '4 Tingkatan Akun'}</a></li>
-            <li><a onclick="scrollToLandingSection('rubrik-section')">${isEn ? '47 Indicators' : '47 Indikator'}</a></li>
-            <li><a onclick="scrollToLandingSection('dokumen-section')">${isEn ? 'Official Docs' : 'Dokumen Cetak'}</a></li>
+            <li><a onclick="scrollToLandingTop()">${isEn ? 'Home' : 'Beranda'}</a></li>
+            <li><a onclick="scrollToLandingSection('deep-learning-section')">Deep Learning</a></li>
+            <li><a onclick="scrollToLandingSection('ekosistem-section')">${isEn ? '4 Roles' : '4 Akun'}</a></li>
+            <li><a onclick="scrollToLandingSection('rubrik-section')">${isEn ? 'Rubric 47' : 'Rubrik 47'}</a></li>
+            <li><a onclick="scrollToLandingSection('dokumen-section')">${isEn ? 'Docs' : 'Dokumen'}</a></li>
             <li><a onclick="scrollToLandingSection('inovator-section')">${isEn ? 'Innovator' : 'Inovator'}</a></li>
           </ul>
 
           <div class="landing-nav-actions">
             <!-- Language Switcher -->
-            <button class="landing-btn landing-btn-outline landing-btn-sm" onclick="toggleLandingLang()">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"></path></svg>
-              ${state.lang.toUpperCase()}
+            <button class="landing-btn landing-btn-outline landing-btn-sm" onclick="toggleLandingLang()" title="Ganti Bahasa">
+              🌐 ${state.lang.toUpperCase()}
             </button>
 
-            <!-- Dashboard Button -->
-            <button class="landing-btn landing-btn-secondary landing-btn-sm" onclick="navigateTo('dashboard')">
+            <!-- Dashboard Button (Prominent & Always Visible) -->
+            <button class="landing-btn landing-btn-primary landing-btn-sm" onclick="navigateTo('dashboard')" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); box-shadow: 0 2px 10px rgba(16,185,129,0.4);" title="Buka Dashboard Aplikasi SITAMA-DEEP">
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-              ${isEn ? 'Demo App' : 'Buka Dashboard'}
+              ${isEn ? 'Dashboard' : 'Buka Dashboard'}
             </button>
 
             <!-- Portal Login Button -->
-            <button class="landing-btn landing-btn-primary landing-btn-sm" onclick="navigateTo('login')">
-              ${isEn ? 'Sign In / Register →' : 'Masuk Portal →'}
+            <button class="landing-btn landing-btn-secondary landing-btn-sm" onclick="navigateTo('login')">
+              ${isEn ? 'Login' : 'Masuk'}
             </button>
           </div>
         </header>
@@ -2392,6 +2391,21 @@
             </div>
           </div>
         </footer>
+
+        <!-- FLOATING ACTION DOCK (ALWAYS ACCESSIBLE WITHOUT SCROLLING) -->
+        <div class="landing-floating-dock">
+          <!-- Back to Top Button -->
+          <button class="landing-float-btn" onclick="scrollToLandingTop()" title="Kembali ke Atas Halaman Beranda">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+            <span>Ke Atas</span>
+          </button>
+
+          <!-- Direct Dashboard Access Button -->
+          <button class="landing-float-btn primary" onclick="navigateTo('dashboard')" title="Langsung Buka Dashboard Aplikasi">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span>Buka Dashboard</span>
+          </button>
+        </div>
       </div>
     `;
   }
@@ -2399,6 +2413,14 @@
   function bindLandingEvents() {
     // Landing page bindings
   }
+
+  window.scrollToLandingTop = function () {
+    const heroEl = document.getElementById('hero');
+    if (heroEl) {
+      heroEl.scrollIntoView({ behavior: 'smooth' });
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   window.scrollToLandingSection = function (id) {
     const el = document.getElementById(id);

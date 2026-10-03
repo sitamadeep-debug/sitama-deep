@@ -1231,19 +1231,21 @@ textarea.form-control {
 .landing-nav-links {
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: 15px;
   list-style: none;
   margin: 0;
   padding: 0;
+  flex-shrink: 1;
 }
 
 .landing-nav-links a {
   color: #CBD5E1;
   text-decoration: none;
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   font-weight: 600;
   transition: color 0.2s;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .landing-nav-links a:hover {
@@ -1253,7 +1255,8 @@ textarea.form-control {
 .landing-nav-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .landing-btn {
@@ -2031,7 +2034,69 @@ textarea.form-control {
   gap: 12px;
 }
 
+/* Floating Action Dock */
+.landing-floating-dock {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.landing-float-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: rgba(16, 31, 66, 0.92);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.22s ease;
+}
+
+.landing-float-btn:hover {
+  transform: translateY(-2px);
+  background: rgba(22, 42, 90, 0.98);
+  border-color: #38BDF8;
+  color: #38BDF8;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55);
+}
+
+.landing-float-btn.primary {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.45);
+}
+
+.landing-float-btn.primary:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  color: #FFFFFF;
+  box-shadow: 0 12px 28px rgba(16, 185, 129, 0.6);
+}
+
 /* Responsive adjustments for Landing Page */
+@media (max-width: 1260px) {
+  .landing-nav { padding: 0 16px; }
+  .landing-nav-links { gap: 10px; }
+  .landing-nav-links a { font-size: 0.8rem; }
+  .landing-brand-title { font-size: 1rem; }
+  .landing-btn-sm { padding: 6px 11px; font-size: 0.78rem; }
+}
+
+@media (max-width: 1100px) {
+  .landing-nav-links { display: none; }
+}
+
 @media (max-width: 1024px) {
   .landing-hero { grid-template-columns: 1fr; padding-top: 48px; }
   .landing-hero-title { font-size: 2.3rem; }
