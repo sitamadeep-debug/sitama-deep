@@ -188,14 +188,6 @@
             </select>
           </div>
 
-          <!-- Supabase Cloud Connection Badge -->
-          <div style="cursor:pointer;" onclick="openSupabaseModal()" title="Konfigurasi Koneksi Cloud Supabase">
-            <span class="badge ${window.SitamaDB && window.SitamaDB.isCloudConnected() ? 'badge-approved' : 'badge-draft'}" style="font-size:0.75rem; display:flex; align-items:center; gap:5px; padding:6px 10px; border-radius:20px;">
-              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
-              ${window.SitamaDB && window.SitamaDB.isCloudConnected() ? 'Supabase Live' : 'Supabase Cloud'}
-            </span>
-          </div>
-
           <!-- Bilingual Switcher Pill -->
           <button class="lang-btn" id="toggleLangBtn">
             <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
@@ -1789,10 +1781,12 @@
           <tr><td><b>Peran Akun</b></td><td><span class="badge badge-approved">${user.role}</span></td></tr>
           <tr><td><b>Unit / Jurusan</b></td><td>${user.department || '-'}</td></tr>
           <tr><td><b>Tugas Pokok</b></td><td>${user.subject_name || '-'}</td></tr>
-          <tr><td><b>Nomor Telepon</b></td><td>${user.phone || '-'}</td></tr>
         </table>
 
-        <button class="btn btn-outline" onclick="navigateTo('login')">${t('logout')}</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; padding-top:16px; border-top:1px solid var(--border-color);">
+          <button class="btn btn-outline" style="font-size:0.8rem;" onclick="openSupabaseModal()">⚙️ Cloud Database Supabase</button>
+          <button class="btn btn-outline" style="color:#DC2626; border-color:#FCA5A5;" onclick="navigateTo('login')">${t('logout')}</button>
+        </div>
       </div>
     `;
   }
