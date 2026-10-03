@@ -4,7 +4,7 @@
 
 (function () {
   // Version Guard: Otomatis membersihkan cache localStorage jika versi aplikasi diperbarui, tapi pertahankan kredensial Supabase & sesi user
-  const APP_VERSION = '2026.10.03.v19';
+  const APP_VERSION = '2026.10.03.v20';
   if (localStorage.getItem('sitama_app_version') !== APP_VERSION) {
     const savedSbUrl = localStorage.getItem('sitama_supabase_url');
     const savedSbKey = localStorage.getItem('sitama_supabase_anon_key');
@@ -19,6 +19,21 @@
     if (savedUserId) localStorage.setItem('sitama_currentUserId', savedUserId);
     if (savedRole) localStorage.setItem('sitama_currentRole', savedRole);
   }
+
+  // HTML Sanitizer to prevent Cross-Site Scripting (XSS)
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  // Security: Brute Force & Rate Limiting Guard
+  let failedLoginAttempts = 0;
+  let loginLockoutTime = 0;
 
   // LocalStorage Helpers
   function getStoredData(key, fallback) {
@@ -309,10 +324,10 @@
     }
 
     return userNotifs.map(n => `
-      <div class="notif-item ${n.is_read ? '' : 'unread'}" onclick="handleNotifClick('${n.id}', '${n.related_module_id}')">
-        <div style="font-weight:700; font-size:0.85rem; color:var(--text-main);">${state.lang === 'en' ? n.title_en : n.title_id}</div>
-        <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">${state.lang === 'en' ? n.message_en : n.message_id}</div>
-        <div style="font-size:0.7rem; color:var(--text-light); margin-top:4px;">${n.created_at}</div>
+      <div class="notif-item ${n.is_read ? '' : 'unread'}" onclick="handleNotifClick('${escapeHtml(n.id)}', '${escapeHtml(n.related_module_id)}')">
+        <div style="font-weight:700; font-size:0.85rem; color:var(--text-main);">${escapeHtml(state.lang === 'en' ? n.title_en : n.title_id)}</div>
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">${escapeHtml(state.lang === 'en' ? n.message_en : n.message_id)}</div>
+        <div style="font-size:0.7rem; color:var(--text-light); margin-top:4px;">${escapeHtml(n.created_at)}</div>
       </div>
     `).join('');
   }
@@ -467,13 +482,13 @@
                 <tr>
                   <td>
                     <div style="font-weight:700; color:var(--primary-dark); font-size:0.92rem;">
-                      ${m.title}
-                      <span class="badge-version">v${m.version_number}</span>
+                      ${escapeHtml(m.title)}
+                      <span class="badge-version">v${escapeHtml(m.version_number)}</span>
                     </div>
-                    <div style="font-size:0.75rem; color:var(--text-light); margin-top:2px;">Diunggah: ${m.submitted_at}</div>
+                    <div style="font-size:0.75rem; color:var(--text-light); margin-top:2px;">Diunggah: ${escapeHtml(m.submitted_at)}</div>
                   </td>
-                  <td><b>${m.department || 'Umum'}</b><br/><span style="font-size:0.8rem; color:var(--text-muted);">${m.subject_name}</span></td>
-                  <td>${m.class_name}</td>
+                  <td><b>${escapeHtml(m.department || 'Umum')}</b><br/><span style="font-size:0.8rem; color:var(--text-muted);">${escapeHtml(m.subject_name)}</span></td>
+                  <td>${escapeHtml(m.class_name)}</td>
                   <td>${renderStatusBadge(m.status)}</td>
                   <td>
                     ${m.review ? `
@@ -484,7 +499,7 @@
                     ` : '<span style="color:var(--text-light);">-</span>'}
                   </td>
                   <td style="max-width:240px; font-size:0.82rem; color:var(--text-muted); line-height:1.4;">
-                    ${m.review ? m.review.general_feedback : '<i>Menunggu telaah oleh Kepala Sekolah...</i>'}
+                    ${m.review ? escapeHtml(m.review.general_feedback) : '<i>Menunggu telaah oleh Kepala Sekolah...</i>'}
                   </td>
                   <td style="text-align:center; white-space:nowrap;">
                     ${m.review ? `
@@ -786,13 +801,13 @@
               ` : list.map(m => `
                 <tr>
                   <td>
-                    <div style="font-weight:700; color:var(--primary-dark); font-size:0.92rem;">${m.title}</div>
-                    <div style="font-size:0.75rem; color:var(--text-light);">${m.submitted_at}</div>
+                    <div style="font-weight:700; color:var(--primary-dark); font-size:0.92rem;">${escapeHtml(m.title)}</div>
+                    <div style="font-size:0.75rem; color:var(--text-light);">${escapeHtml(m.submitted_at)}</div>
                   </td>
-                  <td style="font-weight:600;">${m.teacher_name}</td>
-                  <td><b>${m.department || 'Umum'}</b><br/><span style="font-size:0.8rem; color:var(--text-muted);">${m.subject_name}</span></td>
-                  <td>${m.class_name}</td>
-                  <td><span class="badge-version">v${m.version_number}</span></td>
+                  <td style="font-weight:600;">${escapeHtml(m.teacher_name)}</td>
+                  <td><b>${escapeHtml(m.department || 'Umum')}</b><br/><span style="font-size:0.8rem; color:var(--text-muted);">${escapeHtml(m.subject_name)}</span></td>
+                  <td>${escapeHtml(m.class_name)}</td>
+                  <td><span class="badge-version">v${escapeHtml(m.version_number)}</span></td>
                   <td>${renderStatusBadge(m.status)}</td>
                   <td style="font-weight:800; font-size:0.95rem;">
                     ${m.review ? `${m.review.percentage_score}%` : '<span style="color:var(--text-light);">-</span>'}
@@ -838,7 +853,7 @@
         <div>
           <h1 style="font-size:1.6rem; font-weight:800; color:var(--text-main);">${t('reviewRubricTitle')}</h1>
           <p style="color:var(--text-muted); font-size:0.9rem;">
-            Penelaah: <b>${getCurrentUser().name}</b> (${getCurrentUser().title_badge || 'Kepala Sekolah'}) • Menelaah Modul: <b>${mod.title}</b>
+            Penelaah: <b>${escapeHtml(getCurrentUser().name)}</b> (${escapeHtml(getCurrentUser().title_badge || 'Kepala Sekolah')}) • Menelaah Modul: <b>${escapeHtml(mod.title)}</b>
           </p>
         </div>
         <button class="btn btn-outline" onclick="navigateTo('modules')">${t('back')}</button>
@@ -850,20 +865,20 @@
           <div class="card">
             <div class="card-header"><span class="card-title">Informasi & Berkas Modul</span></div>
             <table class="data-table" style="font-size:0.85rem;">
-              <tr><td style="font-weight:700; width:35%;">Judul Modul</td><td>${mod.title}</td></tr>
-              <tr><td style="font-weight:700;">Guru Pengampu</td><td>${mod.teacher_name} (NIP: ${mod.nip || '-'})</td></tr>
-              <tr><td style="font-weight:700;">Konsentrasi / Mapel</td><td><b>${mod.department || 'Umum'}</b> - ${mod.subject_name}</td></tr>
-              <tr><td style="font-weight:700;">Kelas / Fase</td><td>${mod.class_name} (${mod.phase})</td></tr>
-              <tr><td style="font-weight:700;">Capaian Pembelajaran</td><td>${mod.learning_outcomes}</td></tr>
-              <tr><td style="font-weight:700;">Tujuan Pembelajaran</td><td>${mod.learning_objectives}</td></tr>
+              <tr><td style="font-weight:700; width:35%;">Judul Modul</td><td>${escapeHtml(mod.title)}</td></tr>
+              <tr><td style="font-weight:700;">Guru Pengampu</td><td>${escapeHtml(mod.teacher_name)} (NIP: ${escapeHtml(mod.nip || '-')})</td></tr>
+              <tr><td style="font-weight:700;">Konsentrasi / Mapel</td><td><b>${escapeHtml(mod.department || 'Umum')}</b> - ${escapeHtml(mod.subject_name)}</td></tr>
+              <tr><td style="font-weight:700;">Kelas / Fase</td><td>${escapeHtml(mod.class_name)} (${escapeHtml(mod.phase)})</td></tr>
+              <tr><td style="font-weight:700;">Capaian Pembelajaran</td><td>${escapeHtml(mod.learning_outcomes)}</td></tr>
+              <tr><td style="font-weight:700;">Tujuan Pembelajaran</td><td>${escapeHtml(mod.learning_objectives)}</td></tr>
               <tr><td style="font-weight:700;">Deep Learning Tag</td><td>
                 <span class="badge badge-approved">Mindful</span>
                 <span class="badge badge-approved">Meaningful</span>
                 <span class="badge badge-approved">Joyful</span>
               </td></tr>
               <tr><td style="font-weight:700;">Berkas Terunggah</td><td>
-                <a href="#" style="color:var(--primary-blue); font-weight:700;" onclick="alert('Membuka file: ${mod.file_name}'); return false;">
-                  📄 ${mod.file_name} (${mod.file_size})
+                <a href="#" style="color:var(--primary-blue); font-weight:700;" onclick="alert('Membuka file: ${escapeHtml(mod.file_name)}'); return false;">
+                  📄 ${escapeHtml(mod.file_name)} (${escapeHtml(mod.file_size)})
                 </a>
               </td></tr>
             </table>
@@ -989,7 +1004,7 @@
       return `
         <div class="card" style="text-align:center; padding:40px;">
           <h2>Modul Belum Ditelaah</h2>
-          <p style="color:var(--text-muted); margin-bottom:16px;">Modul "${mod.title}" saat ini masih dalam antrian telaah.</p>
+          <p style="color:var(--text-muted); margin-bottom:16px;">Modul "${escapeHtml(mod.title)}" saat ini masih dalam antrian telaah.</p>
           <button class="btn btn-outline" onclick="navigateTo('modules')">${t('back')}</button>
         </div>
       `;
@@ -999,10 +1014,10 @@
       <div style="margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
         <div>
           <h1 style="font-size:1.6rem; font-weight:800; color:var(--text-main);">${t('reviewResultDetail')}</h1>
-          <p style="color:var(--text-muted); font-size:0.9rem;">Rincian evaluasi 47 indikator untuk modul: <b>${mod.title}</b></p>
+          <p style="color:var(--text-muted); font-size:0.9rem;">Rincian evaluasi 47 indikator untuk modul: <b>${escapeHtml(mod.title)}</b></p>
         </div>
         <div style="display:flex; gap:10px;">
-          <button class="btn btn-primary" onclick="openPrintPreview('${mod.id}')">
+          <button class="btn btn-primary" onclick="openPrintPreview('${escapeHtml(mod.id)}')">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
             ${t('print')} Dokumen Resmi
           </button>
@@ -1036,7 +1051,7 @@
             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
           </div>
           <div>
-            <div class="stat-val" style="font-size:1.25rem;">${rev.eligibility_category}</div>
+            <div class="stat-val" style="font-size:1.25rem;">${escapeHtml(rev.eligibility_category)}</div>
             <div class="stat-lbl">${t('eligibilityCategory')}</div>
           </div>
         </div>
@@ -1045,13 +1060,13 @@
       <div class="card" style="margin-bottom:20px;">
         <div class="card-header"><span class="card-title">Catatan dan Rekomendasi Kepala Sekolah (Sudarso, S.Pd.)</span></div>
         <div style="font-size:0.95rem; line-height:1.6; margin-bottom:12px;">
-          <b>Catatan Umum:</b> "${rev.general_feedback}"
+          <b>Catatan Umum:</b> "${escapeHtml(rev.general_feedback)}"
         </div>
         <div style="font-size:0.95rem; line-height:1.6; color:var(--text-muted);">
-          <b>Rekomendasi Tindak Lanjut:</b> "${rev.recommendation}"
+          <b>Rekomendasi Tindak Lanjut:</b> "${escapeHtml(rev.recommendation)}"
         </div>
         <div style="margin-top:16px; font-size:0.85rem; color:var(--text-light);">
-          Penelaah: <b>${rev.reviewer_name}</b> (NIP: ${rev.reviewer_nip || '197609232008011006'}) • Tanggal Telaah: ${rev.review_date}
+          Penelaah: <b>${escapeHtml(rev.reviewer_name)}</b> (NIP: ${escapeHtml(rev.reviewer_nip || '197609232008011006')}) • Tanggal Telaah: ${escapeHtml(rev.review_date)}
         </div>
       </div>
 
@@ -1120,9 +1135,9 @@
 
       <div class="card" style="max-width:800px; margin:0 auto;">
         <div style="background:#FEF2F2; border-left:4px solid #DC2626; padding:16px; border-radius:8px; margin-bottom:20px;">
-          <h4 style="font-weight:800; color:#991B1B; margin-bottom:4px;">Catatan Penelaah (${rev.reviewer_name || 'Kepala Sekolah'}):</h4>
-          <p style="font-size:0.9rem; color:#7F1D1D;">"${rev.general_feedback || 'Mohon melengkapi rubrik penilaian autentik.'}"</p>
-          <div style="font-size:0.8rem; color:#991B1B; margin-top:8px; font-weight:600;">Batas Waktu Revisi: ${rev.due_revision_date || 'Segera'}</div>
+          <h4 style="font-weight:800; color:#991B1B; margin-bottom:4px;">Catatan Penelaah (${escapeHtml(rev.reviewer_name || 'Kepala Sekolah')}):</h4>
+          <p style="font-size:0.9rem; color:#7F1D1D;">"${escapeHtml(rev.general_feedback || 'Mohon melengkapi rubrik penilaian autentik.')}"</p>
+          <div style="font-size:0.8rem; color:#991B1B; margin-top:8px; font-weight:600;">Batas Waktu Revisi: ${escapeHtml(rev.due_revision_date || 'Segera')}</div>
         </div>
 
         <form id="submitRevisionForm">
@@ -1193,12 +1208,12 @@
         </div>
 
         <table class="data-table" style="font-size:0.85rem; margin-bottom:20px;">
-          <tr><td style="font-weight:700; width:30%;">Nama Guru Pengampu</td><td>${mod.teacher_name} (NIP: ${mod.nip || '-'})</td></tr>
-          <tr><td style="font-weight:700;">Konsentrasi Keahlian / Jurusan</td><td><b>${mod.department || 'Umum'}</b></td></tr>
-          <tr><td style="font-weight:700;">Mata Pelajaran / Kelas</td><td>${mod.subject_name} / ${mod.class_name} (${mod.phase})</td></tr>
-          <tr><td style="font-weight:700;">Judul Modul Ajar</td><td>${mod.title}</td></tr>
-          <tr><td style="font-weight:700;">Tahun Pelajaran / Semester</td><td>${mod.academic_year} / ${mod.semester}</td></tr>
-          <tr><td style="font-weight:700;">Tanggal Penelaahan</td><td>${rev.review_date}</td></tr>
+          <tr><td style="font-weight:700; width:30%;">Nama Guru Pengampu</td><td>${escapeHtml(mod.teacher_name)} (NIP: ${escapeHtml(mod.nip || '-')})</td></tr>
+          <tr><td style="font-weight:700;">Konsentrasi Keahlian / Jurusan</td><td><b>${escapeHtml(mod.department || 'Umum')}</b></td></tr>
+          <tr><td style="font-weight:700;">Mata Pelajaran / Kelas</td><td>${escapeHtml(mod.subject_name)} / ${escapeHtml(mod.class_name)} (${escapeHtml(mod.phase)})</td></tr>
+          <tr><td style="font-weight:700;">Judul Modul Ajar</td><td>${escapeHtml(mod.title)}</td></tr>
+          <tr><td style="font-weight:700;">Tahun Pelajaran / Semester</td><td>${escapeHtml(mod.academic_year)} / ${escapeHtml(mod.semester)}</td></tr>
+          <tr><td style="font-weight:700;">Tanggal Penelaahan</td><td>${escapeHtml(rev.review_date)}</td></tr>
         </table>
 
         <h4 style="font-size:0.95rem; font-weight:800; margin-bottom:8px;">Hasil Penilaian Evaluasi (47 Indikator Rubrik Baku):</h4>
@@ -1225,23 +1240,23 @@
           <div style="font-weight:800; font-size:1rem; margin-bottom:4px;">RINGKASAN SKOR KELAYAKAN PEMBELAJARAN MENDALAM:</div>
           <div>Total Skor Perolehan: <b>${rev.total_score} / 188</b></div>
           <div>Persentase Kelayakan: <b>${rev.percentage_score}%</b></div>
-          <div>Kategori Kelayakan: <b style="text-decoration:underline;">${rev.eligibility_category}</b></div>
-          <div style="margin-top:6px;"><b>Catatan Umum Penelaah:</b> "${rev.general_feedback}"</div>
+          <div>Kategori Kelayakan: <b style="text-decoration:underline;">${escapeHtml(rev.eligibility_category)}</b></div>
+          <div style="margin-top:6px;"><b>Catatan Umum Penelaah:</b> "${escapeHtml(rev.general_feedback)}"</div>
         </div>
 
         <div class="signature-grid">
           <div class="signature-box">
             <div>Guru Pengampu,</div>
             <div class="signature-space"></div>
-            <div style="font-weight:700; text-decoration:underline;">${mod.teacher_name}</div>
-            <div>NIP. ${mod.nip || '-'}</div>
+            <div style="font-weight:700; text-decoration:underline;">${escapeHtml(mod.teacher_name)}</div>
+            <div>NIP. ${escapeHtml(mod.nip || '-')}</div>
           </div>
           <div class="signature-box">
-            <div>Wonosalam, ${rev.review_date}</div>
+            <div>Wonosalam, ${escapeHtml(rev.review_date)}</div>
             <div>Kepala SMK Negeri Wonosalam,</div>
             <div class="signature-space"></div>
-            <div style="font-weight:700; text-decoration:underline;">${state.school.principal_name}</div>
-            <div>NIP. ${state.school.principal_nip}</div>
+            <div style="font-weight:700; text-decoration:underline;">${escapeHtml(state.school.principal_name)}</div>
+            <div>NIP. ${escapeHtml(state.school.principal_nip)}</div>
           </div>
         </div>
       </div>
@@ -1329,14 +1344,14 @@
                 <tr><td colspan="7" style="text-align:center; padding:24px; color:var(--text-muted);">Tidak ada modul menunggu telaah saat ini.</td></tr>
               ` : pendingMods.map(m => `
                 <tr>
-                  <td style="font-weight:700; color:var(--primary-dark);">${m.title}</td>
-                  <td>${m.teacher_name}</td>
-                  <td><b>${m.department || 'Umum'}</b> - ${m.subject_name}</td>
-                  <td>${m.class_name} (${m.phase})</td>
-                  <td>${m.submitted_at}</td>
+                  <td style="font-weight:700; color:var(--primary-dark);">${escapeHtml(m.title)}</td>
+                  <td>${escapeHtml(m.teacher_name)}</td>
+                  <td><b>${escapeHtml(m.department || 'Umum')}</b> - ${escapeHtml(m.subject_name)}</td>
+                  <td>${escapeHtml(m.class_name)} (${escapeHtml(m.phase)})</td>
+                  <td>${escapeHtml(m.submitted_at)}</td>
                   <td>${renderStatusBadge(m.status)}</td>
                   <td style="text-align:center;">
-                    <button class="btn btn-primary btn-sm" onclick="openReviewWorkspace('${m.id}')">${t('review')}</button>
+                    <button class="btn btn-primary btn-sm" onclick="openReviewWorkspace('${escapeHtml(m.id)}')">${t('review')}</button>
                   </td>
                 </tr>
               `).join('')}
@@ -1440,11 +1455,11 @@
             <tbody>
               ${state.auditLogs.slice(0, 5).map(log => `
                 <tr>
-                  <td style="font-weight:700;">${log.user_name}</td>
-                  <td><span class="badge badge-draft">${log.role}</span></td>
-                  <td style="color:var(--primary-blue); font-weight:700;">${log.activity}</td>
-                  <td>${log.description}</td>
-                  <td style="font-size:0.8rem; color:var(--text-light);">${log.created_at}</td>
+                  <td style="font-weight:700;">${escapeHtml(log.user_name)}</td>
+                  <td><span class="badge badge-draft">${escapeHtml(log.role)}</span></td>
+                  <td style="color:var(--primary-blue); font-weight:700;">${escapeHtml(log.activity)}</td>
+                  <td>${escapeHtml(log.description)}</td>
+                  <td style="font-size:0.8rem; color:var(--text-light);">${escapeHtml(log.created_at)}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -1500,18 +1515,18 @@
                 const v = m.tendik_verification;
                 return `
                   <tr>
-                    <td style="font-weight:700;">${m.id}</td>
+                    <td style="font-weight:700;">${escapeHtml(m.id)}</td>
                     <td>
-                      <div style="font-weight:700; color:var(--primary-dark);">${m.title}</div>
-                      <div style="font-size:0.8rem; color:var(--text-muted);">${m.teacher_name}</div>
+                      <div style="font-weight:700; color:var(--primary-dark);">${escapeHtml(m.title)}</div>
+                      <div style="font-size:0.8rem; color:var(--text-muted);">${escapeHtml(m.teacher_name)}</div>
                     </td>
-                    <td><span class="badge badge-draft">${m.department || 'Umum'}</span></td>
+                    <td><span class="badge badge-draft">${escapeHtml(m.department || 'Umum')}</span></td>
                     <td>${renderStatusBadge(m.status)}</td>
-                    <td>${v ? `<span class="badge badge-approved">${v.physical_status}</span>` : `<span class="badge badge-pending">Menunggu Verifikasi</span>`}</td>
-                    <td>${v ? `<b>${v.archive_code}</b><br/><span style="font-size:0.75rem; color:var(--text-muted);">${v.rack_location}</span>` : '-'}</td>
+                    <td>${v ? `<span class="badge badge-approved">${escapeHtml(v.physical_status)}</span>` : `<span class="badge badge-pending">Menunggu Verifikasi</span>`}</td>
+                    <td>${v ? `<b>${escapeHtml(v.archive_code)}</b><br/><span style="font-size:0.75rem; color:var(--text-muted);">${escapeHtml(v.rack_location)}</span>` : '-'}</td>
                     <td style="text-align:center; white-space:nowrap;">
-                      <button class="btn btn-outline btn-sm" onclick="openTendikVerifyModal('${m.id}')">Verifikasi</button>
-                      <button class="btn btn-primary btn-sm" onclick="tendikPrintReceipt('${m.id}')">Cetak Tanda Terima</button>
+                      <button class="btn btn-outline btn-sm" onclick="openTendikVerifyModal('${escapeHtml(m.id)}')">Verifikasi</button>
+                      <button class="btn btn-primary btn-sm" onclick="tendikPrintReceipt('${escapeHtml(m.id)}')">Cetak Tanda Terima</button>
                     </td>
                   </tr>
                 `;
@@ -1661,18 +1676,18 @@
             <tbody>
               ${state.users.map(u => `
                 <tr>
-                  <td style="font-weight:700;">${u.name}</td>
-                  <td>${u.email}<br/><span style="font-size:0.75rem; color:var(--text-muted);">@${u.username}</span></td>
+                  <td style="font-weight:700;">${escapeHtml(u.name)}</td>
+                  <td>${escapeHtml(u.email)}<br/><span style="font-size:0.75rem; color:var(--text-muted);">@${escapeHtml(u.username)}</span></td>
                   <td>
                     <span class="badge ${u.role === 'admin' ? 'badge-draft' : u.role === 'principal' ? 'badge-reviewing' : u.role === 'tendik' ? 'badge-tendik' : 'badge-approved'}">
-                      ${u.title_badge || t(u.role)}
+                      ${escapeHtml(u.title_badge || t(u.role))}
                     </span>
                   </td>
-                  <td>${u.department || '-'}</td>
-                  <td>${u.nip || '-'}</td>
-                  <td><span class="badge badge-approved">${u.status}</span></td>
+                  <td>${escapeHtml(u.department || '-')}</td>
+                  <td>${escapeHtml(u.nip || '-')}</td>
+                  <td><span class="badge badge-approved">${escapeHtml(u.status)}</span></td>
                   <td>
-                    <button class="btn btn-outline btn-sm" onclick="adminResetUserPassword('${u.id}')">Reset Sandi</button>
+                    <button class="btn btn-outline btn-sm" onclick="adminResetUserPassword('${escapeHtml(u.id)}')">Reset Sandi</button>
                   </td>
                 </tr>
               `).join('')}
@@ -1761,12 +1776,12 @@
             <tbody>
               ${state.auditLogs.map(log => `
                 <tr>
-                  <td style="font-size:0.8rem; color:var(--text-light);">${log.created_at}</td>
-                  <td style="font-weight:700;">${log.user_name}</td>
-                  <td><span class="badge badge-draft">${log.role}</span></td>
-                  <td style="color:var(--primary-blue); font-weight:700;">${log.activity}</td>
-                  <td>${log.description}</td>
-                  <td style="font-family:var(--font-mono); font-size:0.8rem;">${log.ip_address}</td>
+                  <td style="font-size:0.8rem; color:var(--text-light);">${escapeHtml(log.created_at)}</td>
+                  <td style="font-weight:700;">${escapeHtml(log.user_name)}</td>
+                  <td><span class="badge badge-draft">${escapeHtml(log.role)}</span></td>
+                  <td style="color:var(--primary-blue); font-weight:700;">${escapeHtml(log.activity)}</td>
+                  <td>${escapeHtml(log.description)}</td>
+                  <td style="font-family:var(--font-mono); font-size:0.8rem;">${escapeHtml(log.ip_address)}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -1786,19 +1801,19 @@
 
       <div class="card" style="max-width:600px;">
         <div style="display:flex; align-items:center; gap:20px; margin-bottom:20px;">
-          <div class="avatar" style="width:64px; height:64px; font-size:1.8rem;">${user.name.charAt(0)}</div>
+          <div class="avatar" style="width:64px; height:64px; font-size:1.8rem;">${escapeHtml(user.name.charAt(0))}</div>
           <div>
-            <h2 style="font-size:1.3rem; font-weight:800;">${user.name}</h2>
-            <div style="color:var(--text-muted); font-size:0.85rem;">${user.title_badge || t(user.role)} • NIP. ${user.nip || '-'}</div>
+            <h2 style="font-size:1.3rem; font-weight:800;">${escapeHtml(user.name)}</h2>
+            <div style="color:var(--text-muted); font-size:0.85rem;">${escapeHtml(user.title_badge || t(user.role))} • NIP. ${escapeHtml(user.nip || '-')}</div>
           </div>
         </div>
 
         <table class="data-table" style="font-size:0.9rem; margin-bottom:20px;">
-          <tr><td><b>Email</b></td><td>${user.email}</td></tr>
-          <tr><td><b>Username</b></td><td>@${user.username}</td></tr>
-          <tr><td><b>Peran Akun</b></td><td><span class="badge badge-approved">${user.role}</span></td></tr>
-          <tr><td><b>Unit / Jurusan</b></td><td>${user.department || '-'}</td></tr>
-          <tr><td><b>Tugas Pokok</b></td><td>${user.subject_name || '-'}</td></tr>
+          <tr><td><b>Email</b></td><td>${escapeHtml(user.email)}</td></tr>
+          <tr><td><b>Username</b></td><td>@${escapeHtml(user.username)}</td></tr>
+          <tr><td><b>Peran Akun</b></td><td><span class="badge badge-approved">${escapeHtml(user.role)}</span></td></tr>
+          <tr><td><b>Unit / Jurusan</b></td><td>${escapeHtml(user.department || '-')}</td></tr>
+          <tr><td><b>Tugas Pokok</b></td><td>${escapeHtml(user.subject_name || '-')}</td></tr>
         </table>
 
         <div style="display:flex; justify-content:flex-end; align-items:center; margin-top:20px; padding-top:16px; border-top:1px solid var(--border-color);">
@@ -3382,6 +3397,13 @@
 
   window.handleLoginSubmit = function (e) {
     e.preventDefault();
+
+    if (Date.now() < loginLockoutTime) {
+      const waitSeconds = Math.ceil((loginLockoutTime - Date.now()) / 1000);
+      alert(`Terlalu banyak percobaan login yang gagal. Akun dikunci sementara demi keamanan. Silakan tunggu ${waitSeconds} detik lagi.`);
+      return;
+    }
+
     const loginInput = document.getElementById('loginUser').value.trim();
     const passInput = document.getElementById('loginPass').value.trim();
 
@@ -3396,10 +3418,11 @@
 
     const user = state.users.find(u => 
       (u.username.toLowerCase() === loginInput.toLowerCase() || u.email.toLowerCase() === loginInput.toLowerCase()) &&
-      (u.password === passInput || passInput === 'password123' || passInput === 'password')
+      u.password === passInput
     );
 
     if (user) {
+      failedLoginAttempts = 0;
       state.currentUserId = user.id;
       state.currentRole = user.role;
       state.loginPresetUser = '';
@@ -3408,7 +3431,13 @@
       saveState();
       renderApp();
     } else {
-      alert('Email/Username atau Kata Sandi salah! Silakan periksa kembali kredensial Anda (kata sandi default akun SMKN Wonosalam: password123).');
+      failedLoginAttempts++;
+      if (failedLoginAttempts >= 5) {
+        loginLockoutTime = Date.now() + 30000; // Lock 30 detik
+        alert('Terlalu banyak percobaan login yang gagal (5 kali)! Akses login ditangguhkan selama 30 detik demi perlindungan keamanan.');
+      } else {
+        alert(`Email/Username atau Kata Sandi salah! Percobaan gagal: ${failedLoginAttempts}/5. (Kata sandi default akun SMKN Wonosalam: password123).`);
+      }
     }
   };
 
@@ -3438,6 +3467,11 @@
     const username = document.getElementById('regUsername').value.trim();
     const pass = document.getElementById('regPass').value;
     const passConfirm = document.getElementById('regPassConfirm').value;
+
+    if (pass.length < 6) {
+      alert('Kata sandi minimal harus 6 karakter demi keamanan akun!');
+      return;
+    }
 
     if (pass !== passConfirm) {
       alert('Konfirmasi kata sandi tidak cocok!');
@@ -3552,11 +3586,16 @@
     const newPassConfirm = document.getElementById('inputNewPassConfirm').value;
 
     const cleanInputOtp = inputOtp.replace(/[^0-9]/g, '');
-    const cleanExpectedOtp = state.recoveryOtpGenerated.replace(/[^0-9]/g, '');
-    const isMatch = (cleanInputOtp && cleanInputOtp === cleanExpectedOtp) || inputOtp === state.recoveryOtpGenerated.toUpperCase() || inputOtp === '123456';
+    const cleanExpectedOtp = (state.recoveryOtpGenerated || '').replace(/[^0-9]/g, '');
+    const isMatch = (cleanInputOtp && cleanInputOtp === cleanExpectedOtp) || (inputOtp && state.recoveryOtpGenerated && inputOtp === state.recoveryOtpGenerated.toUpperCase());
 
     if (!isMatch) {
-      alert('Kode OTP yang Anda masukkan salah!');
+      alert('Kode OTP yang Anda masukkan salah atau sudah tidak berlaku!');
+      return;
+    }
+
+    if (newPass.length < 6) {
+      alert('Kata sandi baru minimal harus 6 karakter demi keamanan akun!');
       return;
     }
 
@@ -3612,6 +3651,11 @@
     const email = document.getElementById('adminNewEmail').value.trim();
     const username = document.getElementById('adminNewUsername').value.trim();
     const pass = document.getElementById('adminNewPass').value;
+
+    if (pass.length < 6) {
+      alert('Kata sandi akun pengguna baru minimal harus 6 karakter demi keamanan akun!');
+      return;
+    }
 
     const newUser = {
       id: 'USR-0' + (state.users.length + 10),
