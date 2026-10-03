@@ -3,11 +3,21 @@
 // Naskah Praktik Baik GEMPITA 2026 - Sudarso, S.Pd. (Kepala SMK Negeri Wonosalam, Jombang)
 
 (function () {
-  // Version Guard: Otomatis membersihkan cache localStorage jika versi aplikasi diperbarui
-  const APP_VERSION = '2026.10.03.v13';
+  // Version Guard: Otomatis membersihkan cache localStorage jika versi aplikasi diperbarui, tapi pertahankan kredensial Supabase & sesi user
+  const APP_VERSION = '2026.10.03.v14';
   if (localStorage.getItem('sitama_app_version') !== APP_VERSION) {
+    const savedSbUrl = localStorage.getItem('sitama_supabase_url');
+    const savedSbKey = localStorage.getItem('sitama_supabase_anon_key');
+    const savedUserId = localStorage.getItem('sitama_currentUserId');
+    const savedRole = localStorage.getItem('sitama_currentRole');
+
     localStorage.clear();
+
     localStorage.setItem('sitama_app_version', APP_VERSION);
+    if (savedSbUrl) localStorage.setItem('sitama_supabase_url', savedSbUrl);
+    if (savedSbKey) localStorage.setItem('sitama_supabase_anon_key', savedSbKey);
+    if (savedUserId) localStorage.setItem('sitama_currentUserId', savedUserId);
+    if (savedRole) localStorage.setItem('sitama_currentRole', savedRole);
   }
 
   // LocalStorage Helpers
@@ -179,6 +189,12 @@
         </div>
 
         <div class="header-actions">
+          <!-- Cloud Supabase Status Pill -->
+          <button class="cloud-status-pill ${window.SitamaDB && window.SitamaDB.isCloudConnected() ? 'connected' : 'offline'}" onclick="openSupabaseModal()" title="Status Koneksi Cloud Database Supabase">
+            <span class="cloud-status-dot"></span>
+            <span>${window.SitamaDB && window.SitamaDB.isCloudConnected() ? '☁️ Supabase: Aktif' : '☁️ Supabase: Lokal'}</span>
+          </button>
+
           <!-- Quick Role Switcher Pill for 4 Account Levels -->
           <div class="role-pill">
             <span>${t('switchRole')}:</span>
@@ -2968,6 +2984,7 @@
     if (!state.activeModal) return '';
 
     if (state.activeModal === 'supabase_config') {
+      const isConnected = window.SitamaDB && window.SitamaDB.isCloudConnected();
       const cfg = window.SitamaDB ? window.SitamaDB.getConfig() : { url: '', key: '' };
       return `
         <div class="modal-backdrop" onclick="closeModal(event)">
@@ -2978,24 +2995,47 @@
             </div>
             <form onsubmit="handleSaveSupabaseConfig(event)">
               <div class="modal-body">
+                ${isConnected ? `
+                  <div style="display:flex; align-items:flex-start; gap:10px; padding:12px 14px; background:#ECFDF5; border:1px solid #A7F3D0; border-radius:8px; color:#065F46; font-size:0.85rem; margin-bottom:16px;">
+                    <span style="font-size:1.2rem; line-height:1;">🟢</span>
+                    <div>
+                      <b style="color:#047857;">Cloud Supabase: Terhubung &amp; Aktif!</b><br/>
+                      <span style="font-size:0.78rem; color:#065F46;">Aplikasi tersinkronisasi online dengan cloud database Supabase SMKN Wonosalam. Data modul ajar, telaah kepala sekolah, dan verifikasi tendik tersimpan aman di cloud.</span>
+                    </div>
+                  </div>
+                ` : `
+                  <div style="display:flex; align-items:flex-start; gap:10px; padding:12px 14px; background:#FFFBEB; border:1px solid #FDE68A; border-radius:8px; color:#92400E; font-size:0.85rem; margin-bottom:16px;">
+                    <span style="font-size:1.2rem; line-height:1;">🟡</span>
+                    <div>
+                      <b style="color:#B45309;">Mode Saat Ini: Offline / Penyimpanan Lokal</b><br/>
+                      <span style="font-size:0.78rem; color:#92400E;">Aplikasi berjalan stabil dengan database lokal di browser. Masukkan <b>Publishable Key</b> Supabase Anda untuk mengaktifkan sinkronisasi cloud real-time.</span>
+                    </div>
+                  </div>
+                `}
+
                 <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:16px;">
-                  Masukkan kredensial <b>Project URL</b> dan <b>Anon Public Key</b> dari Dashboard Supabase Anda (Project Settings &gt; API).
+                  Kredensial Project URL dan Anon Public Key dari Dashboard Supabase Anda (Project Settings &gt; API):
                 </p>
                 <div class="form-group">
                   <label>Supabase Project URL</label>
-                  <input type="url" class="form-control" id="inputSupabaseUrl" placeholder="https://xyzproject.supabase.co" value="${cfg.url}" required />
+                  <input type="url" class="form-control" id="inputSupabaseUrl" placeholder="https://tcoivgttsiykzrubqpnr.supabase.co" value="${cfg.url}" required />
                 </div>
                 <div class="form-group">
-                  <label>Supabase Anon Public Key</label>
-                  <textarea class="form-control" id="inputSupabaseKey" rows="3" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." required style="font-family:monospace; font-size:0.75rem;">${cfg.key}</textarea>
+                  <label>Supabase Anon Public Key / Publishable Key</label>
+                  <textarea class="form-control" id="inputSupabaseKey" rows="3" placeholder="sb_publishable_... atau eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." required style="font-family:monospace; font-size:0.75rem;">${cfg.key}</textarea>
                 </div>
                 <div style="background:#F0FDF4; border:1px solid #86EFAC; color:#166534; padding:10px 12px; border-radius:6px; font-size:0.8rem;">
                   💡 <b>Panduan:</b> Skema database SQL siap pakai tersedia di file <code>supabase-schema.sql</code>. Cukup salin dan jalankan di Supabase SQL Editor.
                 </div>
               </div>
-              <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:8px;">
-                <button type="button" class="btn btn-outline" onclick="closeModal()">Batal</button>
-                <button type="submit" class="btn btn-primary">Simpan &amp; Hubungkan Cloud</button>
+              <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                ${isConnected ? `
+                  <button type="button" class="btn btn-outline" style="color:#DC2626; border-color:#FCA5A5; font-size:0.8rem;" onclick="handleDisconnectSupabase()">Putuskan Cloud</button>
+                ` : `<span></span>`}
+                <div style="display:flex; gap:8px;">
+                  <button type="button" class="btn btn-outline" onclick="closeModal()">Batal</button>
+                  <button type="submit" class="btn btn-primary">Simpan &amp; Hubungkan Cloud</button>
+                </div>
               </div>
             </form>
           </div>
@@ -3605,6 +3645,19 @@
     };
 
     logActivity('Verifikasi Berkas Tendik', `Memverifikasi modul '${mod.title}' dengan kode ${code}`);
+
+    // Sinkronisasi ke Supabase Cloud jika terhubung
+    if (window.SitamaDB && window.SitamaDB.saveTendikVerification) {
+      window.SitamaDB.saveTendikVerification({
+        module_id: mod.id,
+        verified_by: mod.tendik_verification.verified_by,
+        verified_at: mod.tendik_verification.verified_at,
+        archive_code: mod.tendik_verification.archive_code,
+        physical_status: mod.tendik_verification.physical_status,
+        rack_location: mod.tendik_verification.rack_location
+      });
+    }
+
     saveState();
     closeModal();
     alert(`Verifikasi berkas fisik modul "${mod.title}" berhasil dicatat ke Buku Kendali!`);
@@ -3687,6 +3740,14 @@
     const k = document.getElementById('inputSupabaseKey').value.trim();
     if (window.SitamaDB) {
       window.SitamaDB.saveConfig(u, k);
+    }
+  };
+
+  window.handleDisconnectSupabase = function () {
+    if (confirm('Yakin ingin memutuskan koneksi Supabase Cloud dan kembali ke Mode Penyimpanan Lokal?')) {
+      if (window.SitamaDB) {
+        window.SitamaDB.disconnectCloud();
+      }
     }
   };
 
@@ -3868,6 +3929,12 @@
         };
         state.modules.unshift(newMod);
         logActivity('Upload Modul', `Mengunggah modul baru '${newMod.title}' (${newMod.department})`);
+        
+        // Sinkronisasi otomatis ke Supabase Cloud jika terhubung
+        if (window.SitamaDB && window.SitamaDB.insertModule) {
+          window.SitamaDB.insertModule(newMod);
+        }
+
         alert('Modul ajar berhasil dikirim! Status saat ini: Menunggu Telaah Kepala Sekolah.');
         state.currentView = 'modules';
         saveState();
@@ -3911,6 +3978,25 @@
         };
 
         logActivity('Telaah Modul', `Menelaah modul '${mod.title}' dengan skor ${calc.percentage}% (${mod.status})`);
+
+        // Sinkronisasi otomatis ke Supabase Cloud jika terhubung
+        if (window.SitamaDB && window.SitamaDB.saveReview) {
+          window.SitamaDB.saveReview({
+            module_id: mod.id,
+            reviewer_name: mod.review.reviewer_name,
+            reviewer_nip: mod.review.reviewer_nip,
+            review_date: mod.review.review_date,
+            total_score: mod.review.total_score,
+            max_score: mod.review.max_score,
+            percentage_score: mod.review.percentage_score,
+            eligibility_category: mod.review.eligibility_category,
+            general_feedback: mod.review.general_feedback,
+            recommendation: mod.review.recommendation,
+            due_revision_date: mod.review.due_revision_date,
+            scores: mod.review.scores
+          });
+        }
+
         alert(`Hasil telaah berhasil disimpan! Skor: ${calc.percentage}% (${calc.totalScore}/188), Status: ${finalStatus}`);
         state.currentView = 'review_result_detail';
         saveState();
@@ -3940,5 +4026,16 @@
   // Initialize on DOM Ready
   document.addEventListener('DOMContentLoaded', function () {
     renderApp();
+
+    // Auto-fetch modul terbaru dari Cloud Supabase jika terhubung
+    if (window.SitamaDB && window.SitamaDB.isCloudConnected()) {
+      window.SitamaDB.getModules(state.modules).then(cloudMods => {
+        if (cloudMods && Array.isArray(cloudMods) && cloudMods.length > 0) {
+          state.modules = cloudMods;
+          saveState();
+          renderApp();
+        }
+      }).catch(err => console.warn('Supabase initial fetch fallback:', err));
+    }
   });
 })();

@@ -224,6 +224,58 @@ body {
   color: #FFFFFF;
 }
 
+/* Cloud Status Pill */
+.cloud-status-pill {
+  border-radius: var(--radius-full);
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.cloud-status-pill.connected {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #34D399;
+}
+
+.cloud-status-pill.connected:hover {
+  background: rgba(16, 185, 129, 0.25);
+  border-color: #34D399;
+}
+
+.cloud-status-pill.offline {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #FBBF24;
+}
+
+.cloud-status-pill.offline:hover {
+  background: rgba(245, 158, 11, 0.25);
+  border-color: #FBBF24;
+}
+
+.cloud-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.cloud-status-pill.connected .cloud-status-dot {
+  background: #10B981;
+  box-shadow: 0 0 8px #10B981;
+}
+
+.cloud-status-pill.offline .cloud-status-dot {
+  background: #F59E0B;
+}
+
 /* Language Button */
 .lang-btn {
   background: rgba(255, 255, 255, 0.08);

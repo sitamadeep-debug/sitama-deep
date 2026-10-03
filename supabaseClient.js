@@ -2,8 +2,8 @@
 // SMK Negeri Wonosalam - GEMPITA 2026
 
 (function () {
-  // Config defaults: Bisa diisi langsung di bawah ini atau disimpan lewat Settings / LocalStorage
-  const DEFAULT_SUPABASE_URL = "";
+  // Config defaults: Proyek Supabase Resmi SMKN Wonosalam GEMPITA 2026
+  const DEFAULT_SUPABASE_URL = "https://tcoivgttsiykzrubqpnr.supabase.co";
   const DEFAULT_SUPABASE_ANON_KEY = "";
 
   function normalizeUrl(url) {
@@ -36,8 +36,8 @@
     },
     getConfig: function () {
       return {
-        url: localStorage.getItem('sitama_supabase_url') || '',
-        key: localStorage.getItem('sitama_supabase_anon_key') || ''
+        url: localStorage.getItem('sitama_supabase_url') || DEFAULT_SUPABASE_URL,
+        key: localStorage.getItem('sitama_supabase_anon_key') || DEFAULT_SUPABASE_ANON_KEY
       };
     },
     saveConfig: function (url, key) {
@@ -45,6 +45,21 @@
       localStorage.setItem('sitama_supabase_url', clean);
       localStorage.setItem('sitama_supabase_anon_key', (key || '').trim());
       location.reload();
+    },
+    disconnectCloud: function () {
+      localStorage.removeItem('sitama_supabase_url');
+      localStorage.removeItem('sitama_supabase_anon_key');
+      location.reload();
+    },
+    testConnection: async function () {
+      if (!client) return { success: false, message: 'Client belum diinisialisasi atau Anon Key belum dimasukkan.' };
+      try {
+        const { data, error } = await client.from('profiles').select('id').limit(1);
+        if (error) return { success: false, message: error.message };
+        return { success: true, message: 'Koneksi ke Supabase berhasil aktif!' };
+      } catch (err) {
+        return { success: false, message: err.message };
+      }
     },
 
     // 1. Fetch Modules
@@ -74,7 +89,8 @@
     insertModule: async function (moduleObj) {
       if (client) {
         try {
-          const { error } = await client.from('modules').insert([moduleObj]);
+          const { review, tendik_verification, ...cleanModule } = moduleObj;
+          const { error } = await client.from('modules').insert([cleanModule]);
           if (error) console.error('Supabase insert module error:', error);
         } catch (e) {
           console.warn('Supabase offline, disimpan ke lokal:', e);
