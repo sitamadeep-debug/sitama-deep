@@ -2473,7 +2473,11 @@
     const newPass = document.getElementById('inputNewPass').value;
     const newPassConfirm = document.getElementById('inputNewPassConfirm').value;
 
-    if (inputOtp !== state.recoveryOtpGenerated.toUpperCase() && inputOtp !== '123456') {
+    const cleanInputOtp = inputOtp.replace(/[^0-9]/g, '');
+    const cleanExpectedOtp = state.recoveryOtpGenerated.replace(/[^0-9]/g, '');
+    const isMatch = (cleanInputOtp && cleanInputOtp === cleanExpectedOtp) || inputOtp === state.recoveryOtpGenerated.toUpperCase() || inputOtp === '123456';
+
+    if (!isMatch) {
       alert('Kode OTP yang Anda masukkan salah!');
       return;
     }
