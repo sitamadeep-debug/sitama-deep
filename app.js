@@ -4,7 +4,7 @@
 
 (function () {
   // Version Guard: Otomatis membersihkan cache localStorage jika versi aplikasi diperbarui, tapi pertahankan kredensial Supabase & sesi user
-  const APP_VERSION = '2026.10.03.v16';
+  const APP_VERSION = '2026.10.03.v17';
   if (localStorage.getItem('sitama_app_version') !== APP_VERSION) {
     const savedSbUrl = localStorage.getItem('sitama_supabase_url');
     const savedSbKey = localStorage.getItem('sitama_supabase_anon_key');
@@ -1800,8 +1800,7 @@
           <tr><td><b>Tugas Pokok</b></td><td>${user.subject_name || '-'}</td></tr>
         </table>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; padding-top:16px; border-top:1px solid var(--border-color);">
-          <button class="btn btn-outline" style="font-size:0.8rem;" onclick="openSupabaseModal()">⚙️ Cloud Database Supabase</button>
+        <div style="display:flex; justify-content:flex-end; align-items:center; margin-top:20px; padding-top:16px; border-top:1px solid var(--border-color);">
           <button class="btn btn-outline" style="color:#DC2626; border-color:#FCA5A5;" onclick="navigateTo('login')">${t('logout')}</button>
         </div>
       </div>
