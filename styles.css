@@ -176,38 +176,47 @@ body {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 /* Quick Role Switcher Pill */
 .role-pill {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 5px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  padding: 4px 10px;
   border-radius: var(--radius-full);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: #E2E8F0;
   backdrop-filter: blur(8px);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .role-pill span {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: #94A3B8;
   font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1;
 }
 
 .role-pill select {
   background: transparent;
   border: none;
   color: #FFFFFF;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
   outline: none;
+  white-space: nowrap;
+  padding: 2px 4px;
 }
 
 .role-pill select option {

@@ -4,7 +4,7 @@
 
 (function () {
   // Version Guard: Otomatis membersihkan cache localStorage jika versi aplikasi diperbarui
-  const APP_VERSION = '2026.10.03.v11';
+  const APP_VERSION = '2026.10.03.v12';
   if (localStorage.getItem('sitama_app_version') !== APP_VERSION) {
     localStorage.clear();
     localStorage.setItem('sitama_app_version', APP_VERSION);
