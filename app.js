@@ -4,7 +4,7 @@
 
 (function () {
   // Version Guard: Otomatis membersihkan cache localStorage jika versi aplikasi diperbarui, tapi pertahankan kredensial Supabase & sesi user
-  const APP_VERSION = '2026.10.03.v20';
+  const APP_VERSION = '2026.10.03.v21';
   if (localStorage.getItem('sitama_app_version') !== APP_VERSION) {
     const savedSbUrl = localStorage.getItem('sitama_supabase_url');
     const savedSbKey = localStorage.getItem('sitama_supabase_anon_key');
@@ -2773,7 +2773,7 @@
           <h1 style="font-size:1.6rem; font-weight:800; color:var(--primary-dark); margin-bottom:2px; letter-spacing:-0.02em;">${t('appName')}</h1>
           <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:20px;">${t('loginSubtitle')}</p>
 
-          <!-- 3 Segmented Auth Tabs -->
+          <!-- 2 Segmented Auth Tabs -->
           <div class="auth-tabs">
             <button class="auth-tab-btn ${state.authTab === 'login' ? 'active' : ''}" onclick="setAuthTab('login')">
               <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
@@ -2783,28 +2783,12 @@
               <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
               New User
             </button>
-            <button class="auth-tab-btn ${state.authTab === 'forgot' ? 'active' : ''}" onclick="setAuthTab('forgot')">
-              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-              Lupa Sandi
-            </button>
           </div>
 
           <!-- Alert Messages -->
           ${state.registerSuccessMsg ? `
             <div style="background:#ECFDF5; border:1px solid #10B981; color:#065F46; padding:10px 14px; border-radius:8px; font-size:0.82rem; margin-bottom:16px; text-align:left;">
               ${state.registerSuccessMsg}
-            </div>
-          ` : ''}
-
-          ${state.recoverySuccessMsg ? `
-            <div style="background:#ECFDF5; border:1px solid #10B981; color:#065F46; padding:10px 14px; border-radius:8px; font-size:0.82rem; margin-bottom:16px; text-align:left;">
-              ${state.recoverySuccessMsg}
-            </div>
-          ` : ''}
-
-          ${state.recoveryErrorMsg ? `
-            <div style="background:#FEF2F2; border:1px solid #EF4444; color:#991B1B; padding:10px 14px; border-radius:8px; font-size:0.82rem; margin-bottom:16px; text-align:left;">
-              ${state.recoveryErrorMsg}
             </div>
           ` : ''}
 
@@ -2823,7 +2807,6 @@
 
               <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.82rem; margin-bottom:18px;">
                 <label style="display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" checked/> ${t('rememberMe')}</label>
-                <a href="#" style="color:var(--primary-blue); font-weight:700;" onclick="setAuthTab('forgot'); return false;">${t('forgotPassword')}</a>
               </div>
 
               <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; font-size:1rem; margin-bottom:18px;">
@@ -2910,68 +2893,6 @@
                 Daftar Akun Sekarang
               </button>
             </form>
-          ` : ''}
-
-          <!-- TAB 3: FORGOT PASSWORD (EMAIL SIMULATOR & DIRECT RESET) -->
-          ${state.authTab === 'forgot' ? `
-            <div style="text-align:left;">
-              <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:16px;">
-                Masukkan email atau username Anda yang terdaftar di SMKN Wonosalam. Sistem akan mengirimkan instruksi dan kode verifikasi pemulihan OTP.
-              </p>
-
-              ${!state.recoveryOtpGenerated ? `
-                <form onsubmit="handleForgotPasswordRequest(event)">
-                  <div class="form-group">
-                    <label>Email atau Username Terdaftar</label>
-                    <input type="text" class="form-control" id="forgotInput" placeholder="Masukkan username atau email akun Anda..." value="${state.prefilledForgotUser || ''}" required />
-                  </div>
-                  <button type="submit" class="btn btn-primary" style="width:100%; padding:12px;">
-                    Kirim Link & Kode Pemulihan ke Email
-                  </button>
-                </form>
-              ` : `
-                <!-- Real Email Delivery Notification Banner -->
-                <div style="background:#EFF6FF; border:1px solid #BFDBFE; border-left:4px solid #2563EB; padding:14px 16px; border-radius:8px; margin-bottom:20px; text-align:left;">
-                  <div style="font-weight:700; color:#1E40AF; font-size:0.92rem; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                    Kode OTP Telah Dikirim ke Gmail!
-                  </div>
-                  <div style="font-size:0.84rem; color:#1E3A8A; line-height:1.5;">
-                    Sistem telah mengirimkan 6 digit kode verifikasi pemulihan kata sandi ke: <b>${state.recoveryUser.email}</b>.
-                  </div>
-                  <div style="font-size:0.78rem; color:#475569; margin-top:8px;">
-                    💡 <i>Silakan periksa <b>Kotak Masuk (Inbox)</b> atau folder <b>Spam</b> di aplikasi Gmail Anda, lalu masukkan 6 digit kode OTP di bawah ini:</i>
-                  </div>
-                  <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid #DBEAFE; padding-top:8px;">
-                    <span style="font-size:0.76rem; color:#64748B;">Bukan akun Anda atau salah ketik?</span>
-                    <button type="button" class="btn btn-outline" style="font-size:0.75rem; padding:3px 10px; background:#fff;" onclick="handleResetOtpState()">← Ubah Email / Username</button>
-                  </div>
-                </div>
-
-                <!-- Reset Form -->
-                <form onsubmit="handleResetPasswordSubmit(event)">
-                  <div class="form-group">
-                    <label>Masukkan Kode OTP</label>
-                    <input type="text" class="form-control" id="inputOtp" placeholder="Masukkan 6 digit kode OTP..." required />
-                  </div>
-                  <div class="form-group">
-                    <label>Kata Sandi Baru</label>
-                    <input type="password" class="form-control" id="inputNewPass" placeholder="Minimal 6 karakter" required />
-                  </div>
-                  <div class="form-group">
-                    <label>Konfirmasi Kata Sandi Baru</label>
-                    <input type="password" class="form-control" id="inputNewPassConfirm" placeholder="Ulangi sandi baru" required />
-                  </div>
-                  <button type="submit" class="btn btn-success" style="width:100%; padding:12px;">
-                    Simpan Kata Sandi Baru
-                  </button>
-                </form>
-              `}
-
-              <button type="button" class="btn btn-outline" style="width:100%; margin-top:10px;" onclick="setAuthTab('login')">
-                ← Kembali ke Halaman Login
-              </button>
-            </div>
           ` : ''}
 
           <div style="margin-top:24px; font-size:0.75rem; color:var(--text-light);">
@@ -3314,16 +3235,8 @@
   };
 
   window.setAuthTab = function (tab) {
-    const loginEl = document.getElementById('loginUser');
-    if (loginEl && loginEl.value && loginEl.value.trim()) {
-      state.prefilledForgotUser = loginEl.value.trim();
-    }
-    state.authTab = tab;
-    state.recoverySuccessMsg = '';
-    state.recoveryErrorMsg = '';
+    state.authTab = (tab === 'register') ? 'register' : 'login';
     state.registerSuccessMsg = '';
-    state.recoveryOtpGenerated = '';
-    state.recoveryUser = null;
     renderApp();
   };
 
