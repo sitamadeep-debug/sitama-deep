@@ -4,7 +4,7 @@
 
 (function () {
   // Version Guard: Otomatis membersihkan cache localStorage jika versi aplikasi diperbarui, tapi pertahankan kredensial Supabase & sesi user
-  const APP_VERSION = '2026.10.03.v24';
+  const APP_VERSION = '2026.10.04.v25';
   if (localStorage.getItem('sitama_app_version') !== APP_VERSION) {
     const savedSbUrl = localStorage.getItem('sitama_supabase_url');
     const savedSbKey = localStorage.getItem('sitama_supabase_anon_key');
@@ -53,7 +53,7 @@
     lang: getStoredData('lang', 'id'),
     currentUserId: getStoredData('currentUserId', 'USR-002'), // Default Sudarso, S.Pd. (Kepsek)
     currentRole: getStoredData('currentRole', 'principal'),
-    currentView: getStoredData('currentView', 'landing'),
+    currentView: 'landing', // Selalu arahkan pengunjung ke Landing Page saat membuka aplikasi
     selectedModuleId: getStoredData('selectedModuleId', 'MOD-001'),
     
     school: initialMockData.school,
@@ -84,6 +84,7 @@
     // Modals and Active Workspace
     reviewDraftScores: {},
     activeModal: null, // null | 'new_user_admin' | 'tendik_verify'
+    showLoginModal: false, // true = tampilkan login modal popup di atas landing page
     selectedVerifyModId: null,
     showNotifDropdown: false
   };
@@ -173,17 +174,25 @@
   function renderApp() {
     const appEl = document.getElementById('app');
     
-    // Public Landing Page
+    // Public Landing Page (selalu ditampilkan terlebih dahulu)
     if (state.currentView === 'landing') {
       appEl.innerHTML = renderLandingPage();
       bindLandingEvents();
+      // Render login modal popup di atas landing jika diminta
+      if (state.showLoginModal) {
+        renderLoginModal();
+      }
       return;
     }
 
-    // Auth Page (Login, New User, Forgot Password)
+    // Auth Page fallback (login sebagai halaman penuh, tetap didukung)
     if (state.currentView === 'login') {
-      appEl.innerHTML = renderLoginPage();
-      bindEvents();
+      // Redirect ke landing + tampilkan login modal
+      state.currentView = 'landing';
+      appEl.innerHTML = renderLandingPage();
+      bindLandingEvents();
+      state.showLoginModal = true;
+      renderLoginModal();
       return;
     }
 
@@ -2993,6 +3002,206 @@
     `;
   }
 
+  /* ------------------- LOGIN MODAL POPUP (di atas Landing Page) ------------------- */
+  function renderLoginModal() {
+    let el = document.getElementById('loginModalContainer');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'loginModalContainer';
+      document.body.appendChild(el);
+    }
+
+    const isEn = state.lang === 'en';
+
+    // Bangun inner content card login (tanpa tombol "Kembali ke Beranda")
+    const cardContent = `
+      <img src="${state.school.logo}" alt="Logo SMKN Wonosalam" style="height:68px; margin-bottom:10px; filter:drop-shadow(0 2px 6px rgba(0,0,0,0.15));"/>
+      <h1 style="font-size:1.5rem; font-weight:800; color:var(--primary-dark); margin-bottom:2px; letter-spacing:-0.02em;">${t('appName')}</h1>
+      <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:18px;">${t('loginSubtitle')}</p>
+
+      ${state.authTab !== 'forgot' ? `
+        <div class="auth-tabs">
+          <button class="auth-tab-btn ${state.authTab === 'login' ? 'active' : ''}" onclick="setAuthTab('login')">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+            ${isEn ? 'Login' : 'Masuk'}
+          </button>
+          <button class="auth-tab-btn ${state.authTab === 'register' ? 'active' : ''}" onclick="setAuthTab('register')">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+            New User
+          </button>
+        </div>
+      ` : `
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; padding-bottom:12px; border-bottom:1px solid var(--border-color);">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:1.1rem;">🔑</span>
+            <h2 style="font-size:1.1rem; font-weight:800; color:var(--primary-dark); margin:0;">Pemulihan Kata Sandi</h2>
+          </div>
+          <button type="button" class="btn btn-outline btn-sm" onclick="setAuthTab('login')" style="font-size:0.76rem;">← Kembali</button>
+        </div>
+      `}
+
+      ${state.registerSuccessMsg ? `<div style="background:#ECFDF5; border:1px solid #10B981; color:#065F46; padding:10px 14px; border-radius:8px; font-size:0.82rem; margin-bottom:14px; text-align:left;">${state.registerSuccessMsg}</div>` : ''}
+      ${state.recoverySuccessMsg ? `<div style="background:#ECFDF5; border:1px solid #10B981; color:#065F46; padding:10px 14px; border-radius:8px; font-size:0.82rem; margin-bottom:14px; text-align:left;">${state.recoverySuccessMsg}</div>` : ''}
+
+      ${state.authTab === 'login' ? `
+        <form onsubmit="handleLoginSubmit(event)" style="text-align:left;">
+          <div class="form-group">
+            <label>${t('emailOrUsername')}</label>
+            <input type="text" class="form-control" id="loginUser" placeholder="Email atau username..." value="${state.loginPresetUser || state.lastRegisteredUsername || ''}" required/>
+          </div>
+          <div class="form-group">
+            <label>${t('password')}</label>
+            <input type="password" class="form-control" id="loginPass" placeholder="Masukkan kata sandi..." value="" required autocomplete="current-password"/>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.82rem; margin-bottom:18px;">
+            <label style="display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" checked/> ${t('rememberMe')}</label>
+            <a href="javascript:void(0)" onclick="setAuthTab('forgot')" style="color:var(--primary-blue); font-weight:600; text-decoration:none; cursor:pointer;">Lupa Sandi?</a>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; font-size:1rem; margin-bottom:16px;">${t('loginButton')}</button>
+        </form>
+        <div style="border-top:1px solid var(--border-color); padding-top:14px; font-size:0.77rem; color:var(--text-muted);">
+          <p style="margin-bottom:8px; font-weight:700;">Pilih username akun demo (tetap wajib memasukkan kata sandi):</p>
+          <div style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap;">
+            <button type="button" class="demo-role-pill" onclick="selectDemoUser('admin')">1. Admin (Siti)</button>
+            <button type="button" class="demo-role-pill" onclick="selectDemoUser('kepsek')">2. Kepsek (Sudarso)</button>
+            <button type="button" class="demo-role-pill" onclick="selectDemoUser('waka_kurikulum')">2. Waka (Bambang)</button>
+            <button type="button" class="demo-role-pill" onclick="selectDemoUser('guru_atp')">3. Guru (Budi)</button>
+            <button type="button" class="demo-role-pill" onclick="selectDemoUser('guru_kuliner')">3. Guru (Dewi)</button>
+            <button type="button" class="demo-role-pill" onclick="selectDemoUser('tendik_tu')">4. Tendik (Tri TU)</button>
+          </div>
+        </div>
+      ` : ''}
+
+      ${state.authTab === 'register' ? `
+        <form onsubmit="handleRegisterSubmit(event)" style="text-align:left;">
+          <div class="form-group">
+            <label>Peran Akun</label>
+            <select class="form-control" id="regRole" onchange="handleRegisterRoleChange(this.value)" required>
+              <option value="teacher">3. Guru Mata Pelajaran / Kejuruan</option>
+              <option value="tendik">4. Tendik / Tata Usaha</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Nama Lengkap (beserta Gelar)</label>
+            <input type="text" class="form-control" id="regName" placeholder="Contoh: Siti Fatimah, S.Pd." required />
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>NIP / NUPTK</label>
+              <input type="text" class="form-control" id="regNIP" placeholder="1988..." required />
+            </div>
+            <div class="form-group">
+              <label id="regDeptLabel">Konsentrasi Keahlian</label>
+              <select class="form-control" id="regDept">
+                <option value="ATP">Agribisnis Tanaman Perkebunan (ATP)</option>
+                <option value="Kuliner">Kuliner</option>
+                <option value="TKR">Teknik Kendaraan Ringan (TKR)</option>
+                <option value="TPM">Teknik Pemesinan (TPM)</option>
+                <option value="Umum">Mata Pelajaran Umum</option>
+                <option value="Tata Usaha">Tata Usaha</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label id="regSubjectLabel">Mata Pelajaran / Tugas Pokok</label>
+            <input type="text" class="form-control" id="regSubject" placeholder="Contoh: Dasar Budidaya Tanaman" required />
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Email Akun</label>
+              <input type="email" class="form-control" id="regEmail" placeholder="nama@smknwonosalam.sch.id" required />
+            </div>
+            <div class="form-group">
+              <label>Username</label>
+              <input type="text" class="form-control" id="regUsername" placeholder="guru_baru" required />
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Kata Sandi</label>
+              <input type="password" class="form-control" id="regPass" placeholder="Min. 6 karakter" required />
+            </div>
+            <div class="form-group">
+              <label>Konfirmasi Sandi</label>
+              <input type="password" class="form-control" id="regPassConfirm" placeholder="Ulangi sandi" required />
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; margin-top:6px;">Daftar Akun Sekarang</button>
+        </form>
+      ` : ''}
+
+      ${state.authTab === 'forgot' ? `
+        <div style="text-align:left;">
+          ${!state.recoveryOtpGenerated ? `
+            <form onsubmit="handleForgotPasswordRequest(event)">
+              <p style="font-size:0.84rem; color:var(--text-muted); margin-bottom:14px; line-height:1.5;">
+                Masukkan alamat email akun SMKN Wonosalam Anda. Sistem akan <b>mengirimkan kode OTP</b> verifikasi ke email tersebut.
+              </p>
+              ${state.recoveryErrorMsg ? `<div style="background:#FEF2F2; border:1px solid #FCA5A5; color:#991B1B; padding:10px 14px; border-radius:8px; font-size:0.82rem; margin-bottom:14px;">⚠️ ${escapeHtml(state.recoveryErrorMsg)}</div>` : ''}
+              <div class="form-group">
+                <label style="font-weight:700; font-size:0.85rem;">Alamat Email Terdaftar</label>
+                <input type="text" class="form-control" id="forgotInput" placeholder="Contoh: guru_atp@smknwonosalam.sch.id atau username..." value="${escapeHtml(state.prefilledForgotUser || '')}" required />
+              </div>
+              <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; font-weight:700; margin-top:6px;">Kirim Kode OTP ke Email</button>
+              <div style="text-align:center; margin-top:14px;">
+                <a href="javascript:void(0)" onclick="setAuthTab('login')" style="font-size:0.82rem; color:var(--text-muted); text-decoration:none;">Sudah ingat? <b style="color:var(--primary-blue);">Masuk Sekarang</b></a>
+              </div>
+            </form>
+          ` : `
+            <form onsubmit="handleResetPasswordSubmit(event)">
+              <div style="background:#EFF6FF; border:1px solid #BFDBFE; border-left:4px solid #2563EB; padding:12px 14px; border-radius:8px; margin-bottom:14px;">
+                <div style="font-weight:700; color:#1E40AF; font-size:0.88rem; margin-bottom:4px; display:flex; align-items:center; gap:5px;">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                  Kode OTP Terkirim ke Email!
+                </div>
+                <div style="font-size:0.82rem; color:#1E3A8A;">Kode 6 digit dikirim ke: <b>${escapeHtml(state.recoveryUser ? state.recoveryUser.email : '')}</b></div>
+                <div style="margin-top:8px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid #DBEAFE; padding-top:6px;">
+                  <span style="font-size:0.74rem; color:#64748B;">Salah email?</span>
+                  <button type="button" class="btn btn-outline" style="font-size:0.72rem; padding:3px 9px;" onclick="handleResetOtpState()">← Ganti Email</button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label style="font-weight:700; font-size:0.85rem;">Kode OTP (6 Digit)</label>
+                <input type="text" class="form-control" id="inputOtp" placeholder="Contoh: 849201" required style="letter-spacing:2px; font-weight:700; text-align:center; font-size:1.1rem;" />
+              </div>
+              <div class="grid-2">
+                <div class="form-group">
+                  <label style="font-weight:700; font-size:0.85rem;">Kata Sandi Baru</label>
+                  <input type="password" class="form-control" id="inputNewPass" placeholder="Min. 6 karakter" required />
+                </div>
+                <div class="form-group">
+                  <label style="font-weight:700; font-size:0.85rem;">Konfirmasi Sandi</label>
+                  <input type="password" class="form-control" id="inputNewPassConfirm" placeholder="Ulangi kata sandi" required />
+                </div>
+              </div>
+              <button type="submit" class="btn btn-success" style="width:100%; padding:12px; font-weight:700; margin-top:6px;">Simpan &amp; Perbarui Kata Sandi</button>
+              <div style="text-align:center; margin-top:12px;">
+                <button type="button" class="btn btn-outline" style="width:100%; font-size:0.84rem;" onclick="setAuthTab('login')">← Batal &amp; Kembali ke Login</button>
+              </div>
+            </form>
+          `}
+        </div>
+      ` : ''}
+
+      <div style="margin-top:20px; font-size:0.73rem; color:var(--text-light);">
+        SITAMA-DEEP © 2026 SMK Negeri Wonosalam, Jombang.
+      </div>
+    `;
+
+    el.innerHTML = `
+      <div class="login-modal-backdrop" id="loginModalBackdrop" onclick="closeLoginModal(event)">
+        <div class="login-modal-card" onclick="event.stopPropagation()">
+          <button class="login-modal-close" onclick="closeLoginModal()" title="Tutup &amp; kembali ke Beranda">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+          <div style="text-align:center;">
+            ${cardContent}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   /* ------------------- MODAL DIALOGS ------------------- */
   function renderActiveModalHTML() {
     if (!state.activeModal) return '';
@@ -3318,11 +3527,49 @@
 
   /* ------------------- GLOBAL WINDOW FUNCTIONS & HANDLERS ------------------- */
   window.navigateTo = function (view) {
+    if (view === 'login') {
+      // Tampilkan login sebagai modal popup di atas landing page
+      state.currentView = 'landing';
+      state.showLoginModal = true;
+      state.authTab = 'login';
+      saveState();
+      renderApp();
+      return;
+    }
+    // Tutup modal login jika berpindah ke view lain
+    state.showLoginModal = false;
+    var loginModal = document.getElementById('loginModalContainer');
+    if (loginModal) loginModal.innerHTML = '';
     state.currentView = view;
     saveState();
     renderApp();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  window.closeLoginModal = function (e) {
+    if (e && e.target && e.target.id !== 'loginModalBackdrop' && !e.target.closest('.login-modal-close')) return;
+    state.showLoginModal = false;
+    state.authTab = 'login';
+    state.recoveryErrorMsg = '';
+    state.recoverySuccessMsg = '';
+    state.recoveryOtpGenerated = '';
+    state.recoveryUser = null;
+    state.loginPresetUser = '';
+    saveState();
+    var loginModal = document.getElementById('loginModalContainer');
+    if (loginModal) loginModal.innerHTML = '';
+  };
+
+  if (!window._loginModalEscBound) {
+    window._loginModalEscBound = true;
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && state.showLoginModal) {
+        window.closeLoginModal();
+      }
+    });
+  }
+
+
 
   window.setAuthTab = function (tab) {
     const loginEl = document.getElementById('loginUser');
@@ -3335,6 +3582,10 @@
     state.recoverySuccessMsg = '';
     state.recoveryOtpGenerated = '';
     state.recoveryUser = null;
+    if (state.showLoginModal) {
+      renderLoginModal();
+      return;
+    }
     renderApp();
   };
 
@@ -3347,6 +3598,10 @@
     state.recoveryUser = null;
     state.recoverySuccessMsg = '';
     state.recoveryErrorMsg = '';
+    if (state.showLoginModal) {
+      renderLoginModal();
+      return;
+    }
     renderApp();
   };
 
@@ -3385,7 +3640,10 @@
     state.authTab = 'login';
     state.recoveryErrorMsg = '';
     state.recoverySuccessMsg = '';
-    navigateTo('login');
+    state.currentView = 'landing';
+    state.showLoginModal = true;
+    saveState();
+    renderApp();
   };
 
   window.selectDemoUser = function (uname) {
@@ -3441,6 +3699,10 @@
       state.currentUserId = user.id;
       state.currentRole = user.role;
       state.loginPresetUser = '';
+      state.showLoginModal = false;
+      // Tutup modal container
+      var loginModal = document.getElementById('loginModalContainer');
+      if (loginModal) loginModal.innerHTML = '';
       state.currentView = 'dashboard';
       logActivity('Login Sistem', `Pengguna ${user.name} berhasil masuk`);
       saveState();
@@ -3540,6 +3802,10 @@
     state.authTab = 'login';
     state.lastRegisteredUsername = username;
     state.registerSuccessMsg = `Selamat! Akun ${name} berhasil dibuat. Silakan masuk menggunakan username: "${username}".`;
+    if (state.showLoginModal) {
+      renderLoginModal();
+      return;
+    }
     renderApp();
   };
 
@@ -3552,6 +3818,10 @@
 
     if (!user) {
       state.recoveryErrorMsg = `Email atau username "${query}" tidak ditemukan di database SMKN Wonosalam.`;
+      if (state.showLoginModal) {
+        renderLoginModal();
+        return;
+      }
       renderApp();
       return;
     }
@@ -3591,6 +3861,10 @@
       }
     }
 
+    if (state.showLoginModal) {
+      renderLoginModal();
+      return;
+    }
     renderApp();
   };
 
@@ -3639,6 +3913,10 @@
     state.recoverySuccessMsg = 'Kata sandi berhasil diperbarui! Silakan masuk dengan kata sandi baru Anda.';
     state.loginPresetUser = userInDb ? (userInDb.username || userInDb.email) : '';
     alert('Kata sandi berhasil diperbarui! Silakan masuk dengan kata sandi baru Anda.');
+    if (state.showLoginModal) {
+      renderLoginModal();
+      return;
+    }
     renderApp();
   };
 

@@ -2523,3 +2523,91 @@ textarea.form-control {
   .landing-photo-modal-img-wrap { max-height: 48vh; }
 }
 
+/* ==========================================================================
+   LOGIN MODAL POP-UP DIALOG (OVERLAY DI ATAS LANDING PAGE)
+   ========================================================================== */
+.login-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(10, 17, 40, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+  animation: loginModalBackdropIn 0.25s ease-out;
+}
+
+@keyframes loginModalBackdropIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.login-modal-card {
+  position: relative;
+  background: #FFFFFF;
+  width: 100%;
+  max-width: 490px;
+  max-height: 92vh;
+  overflow-y: auto;
+  border-radius: var(--radius-xl);
+  box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.2);
+  padding: 34px 32px;
+  animation: loginModalCardIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes loginModalCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.login-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background: #F8FAFC;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.login-modal-close:hover {
+  background: #FEE2E2;
+  color: #DC2626;
+  border-color: #FCA5A5;
+  transform: rotate(90deg);
+}
+
+@media (max-width: 640px) {
+  .login-modal-card {
+    padding: 24px 18px;
+    max-height: 95vh;
+  }
+  .login-modal-close {
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+  }
+}
+
+
