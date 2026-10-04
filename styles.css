@@ -2526,6 +2526,10 @@ textarea.form-control {
 /* ==========================================================================
    LOGIN MODAL POP-UP DIALOG (OVERLAY DI ATAS LANDING PAGE)
    ========================================================================== */
+body.modal-open {
+  overflow: hidden !important;
+}
+
 .login-modal-backdrop {
   position: fixed;
   top: 0;
@@ -2541,6 +2545,15 @@ textarea.form-control {
   z-index: 9999;
   padding: 16px;
   animation: loginModalBackdropIn 0.25s ease-out;
+  overflow-y: auto;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.login-modal-backdrop::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 @keyframes loginModalBackdropIn {
@@ -2552,19 +2565,27 @@ textarea.form-control {
   position: relative;
   background: #FFFFFF;
   width: 100%;
-  max-width: 490px;
-  max-height: 92vh;
+  max-width: 480px;
+  max-height: 94vh;
   overflow-y: auto;
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE / Edge */
   border-radius: var(--radius-xl);
   box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.2);
-  padding: 34px 32px;
+  padding: 26px 28px;
   animation: loginModalCardIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.login-modal-card::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari, Opera, Edge */
+  width: 0 !important;
+  height: 0 !important;
 }
 
 @keyframes loginModalCardIn {
   from {
     opacity: 0;
-    transform: translateY(24px) scale(0.95);
+    transform: translateY(20px) scale(0.96);
   }
   to {
     opacity: 1;
@@ -2574,10 +2595,10 @@ textarea.form-control {
 
 .login-modal-close {
   position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 36px;
-  height: 36px;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   border: 1px solid var(--border-color);
   background: #F8FAFC;
@@ -2599,7 +2620,7 @@ textarea.form-control {
 
 @media (max-width: 640px) {
   .login-modal-card {
-    padding: 24px 18px;
+    padding: 22px 18px;
     max-height: 95vh;
   }
   .login-modal-close {
@@ -2609,5 +2630,6 @@ textarea.form-control {
     height: 32px;
   }
 }
+
 
 

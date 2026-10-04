@@ -4,7 +4,7 @@
 
 (function () {
   // Version Guard: Otomatis membersihkan cache localStorage jika versi aplikasi diperbarui, tapi pertahankan kredensial Supabase & sesi user
-  const APP_VERSION = '2026.10.04.v25';
+  const APP_VERSION = '2026.10.04.v26';
   if (localStorage.getItem('sitama_app_version') !== APP_VERSION) {
     const savedSbUrl = localStorage.getItem('sitama_supabase_url');
     const savedSbKey = localStorage.getItem('sitama_supabase_anon_key');
@@ -3010,17 +3010,18 @@
       el.id = 'loginModalContainer';
       document.body.appendChild(el);
     }
+    document.body.classList.add('modal-open');
 
     const isEn = state.lang === 'en';
 
     // Bangun inner content card login (tanpa tombol "Kembali ke Beranda")
     const cardContent = `
-      <img src="${state.school.logo}" alt="Logo SMKN Wonosalam" style="height:68px; margin-bottom:10px; filter:drop-shadow(0 2px 6px rgba(0,0,0,0.15));"/>
-      <h1 style="font-size:1.5rem; font-weight:800; color:var(--primary-dark); margin-bottom:2px; letter-spacing:-0.02em;">${t('appName')}</h1>
-      <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:18px;">${t('loginSubtitle')}</p>
+      <img src="${state.school.logo}" alt="Logo SMKN Wonosalam" style="height:56px; margin-bottom:8px; filter:drop-shadow(0 2px 6px rgba(0,0,0,0.15));"/>
+      <h1 style="font-size:1.35rem; font-weight:800; color:var(--primary-dark); margin-bottom:2px; letter-spacing:-0.02em;">${t('appName')}</h1>
+      <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:14px;">${t('loginSubtitle')}</p>
 
       ${state.authTab !== 'forgot' ? `
-        <div class="auth-tabs">
+        <div class="auth-tabs" style="margin-bottom:16px;">
           <button class="auth-tab-btn ${state.authTab === 'login' ? 'active' : ''}" onclick="setAuthTab('login')">
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
             ${isEn ? 'Login' : 'Masuk'}
@@ -3031,10 +3032,10 @@
           </button>
         </div>
       ` : `
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; padding-bottom:12px; border-bottom:1px solid var(--border-color);">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid var(--border-color);">
           <div style="display:flex; align-items:center; gap:8px;">
             <span style="font-size:1.1rem;">🔑</span>
-            <h2 style="font-size:1.1rem; font-weight:800; color:var(--primary-dark); margin:0;">Pemulihan Kata Sandi</h2>
+            <h2 style="font-size:1.05rem; font-weight:800; color:var(--primary-dark); margin:0;">Pemulihan Kata Sandi</h2>
           </div>
           <button type="button" class="btn btn-outline btn-sm" onclick="setAuthTab('login')" style="font-size:0.76rem;">← Kembali</button>
         </div>
@@ -3045,23 +3046,23 @@
 
       ${state.authTab === 'login' ? `
         <form onsubmit="handleLoginSubmit(event)" style="text-align:left;">
-          <div class="form-group">
-            <label>${t('emailOrUsername')}</label>
+          <div class="form-group" style="margin-bottom:12px;">
+            <label style="font-size:0.82rem;">${t('emailOrUsername')}</label>
             <input type="text" class="form-control" id="loginUser" placeholder="Email atau username..." value="${state.loginPresetUser || state.lastRegisteredUsername || ''}" required/>
           </div>
-          <div class="form-group">
-            <label>${t('password')}</label>
+          <div class="form-group" style="margin-bottom:12px;">
+            <label style="font-size:0.82rem;">${t('password')}</label>
             <input type="password" class="form-control" id="loginPass" placeholder="Masukkan kata sandi..." value="" required autocomplete="current-password"/>
           </div>
-          <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.82rem; margin-bottom:18px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.82rem; margin-bottom:14px;">
             <label style="display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" checked/> ${t('rememberMe')}</label>
             <a href="javascript:void(0)" onclick="setAuthTab('forgot')" style="color:var(--primary-blue); font-weight:600; text-decoration:none; cursor:pointer;">Lupa Sandi?</a>
           </div>
-          <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; font-size:1rem; margin-bottom:16px;">${t('loginButton')}</button>
+          <button type="submit" class="btn btn-primary" style="width:100%; padding:11px; font-size:0.95rem; margin-bottom:14px;">${t('loginButton')}</button>
         </form>
-        <div style="border-top:1px solid var(--border-color); padding-top:14px; font-size:0.77rem; color:var(--text-muted);">
-          <p style="margin-bottom:8px; font-weight:700;">Pilih username akun demo (tetap wajib memasukkan kata sandi):</p>
-          <div style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap;">
+        <div style="border-top:1px solid var(--border-color); padding-top:10px; font-size:0.75rem; color:var(--text-muted);">
+          <p style="margin-bottom:6px; font-weight:700;">Pilih username akun demo (tetap wajib memasukkan kata sandi):</p>
+          <div style="display:flex; gap:5px; justify-content:center; flex-wrap:wrap;">
             <button type="button" class="demo-role-pill" onclick="selectDemoUser('admin')">1. Admin (Siti)</button>
             <button type="button" class="demo-role-pill" onclick="selectDemoUser('kepsek')">2. Kepsek (Sudarso)</button>
             <button type="button" class="demo-role-pill" onclick="selectDemoUser('waka_kurikulum')">2. Waka (Bambang)</button>
@@ -3548,6 +3549,7 @@
 
   window.closeLoginModal = function (e) {
     if (e && e.target && e.target.id !== 'loginModalBackdrop' && !e.target.closest('.login-modal-close')) return;
+    document.body.classList.remove('modal-open');
     state.showLoginModal = false;
     state.authTab = 'login';
     state.recoveryErrorMsg = '';
@@ -3700,6 +3702,7 @@
       state.currentRole = user.role;
       state.loginPresetUser = '';
       state.showLoginModal = false;
+      document.body.classList.remove('modal-open');
       // Tutup modal container
       var loginModal = document.getElementById('loginModalContainer');
       if (loginModal) loginModal.innerHTML = '';
