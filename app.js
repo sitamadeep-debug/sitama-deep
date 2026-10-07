@@ -4,7 +4,7 @@
 
 (function () {
   // Version Guard: Otomatis membersihkan cache localStorage jika versi aplikasi diperbarui, tapi pertahankan kredensial Supabase & sesi user
-  const APP_VERSION = '2026.10.07.v27';
+  const APP_VERSION = '2026.10.07.v28';
   if (localStorage.getItem('sitama_app_version') !== APP_VERSION) {
     const savedSbUrl = localStorage.getItem('sitama_supabase_url');
     const savedSbKey = localStorage.getItem('sitama_supabase_anon_key');
@@ -1647,24 +1647,58 @@
                 </div>
               </div>
 
-              <div class="form-group">
-                <label>Judul Utama Hero Banner (ID)</label>
-                <input type="text" class="form-control" id="cpHeroTitle" value="${escapeHtml(content.heroTitle || '')}" required />
+              <div class="grid-2">
+                <div class="form-group">
+                  <label>Teks Pill Kampus / Bangunan (ID)</label>
+                  <input type="text" class="form-control" id="cpHeroBuildingPill" value="${escapeHtml(content.heroBuildingPill || '🏛️ Gedung Utama & Kampus SMKN Wonosalam (Lereng Gn. Anjasmoro)')}" required />
+                </div>
+                <div class="form-group">
+                  <label>Teks Pill Kampus / Bangunan (EN)</label>
+                  <input type="text" class="form-control" id="cpHeroBuildingPillEn" value="${escapeHtml(content.heroBuildingPill_en || '🏛️ Main Campus SMKN Wonosalam (Mt. Anjasmoro Slopes)')}" required />
+                </div>
+              </div>
+
+              <div class="grid-2">
+                <div class="form-group">
+                  <label>Judul Baris 1 (Teks Putih) (ID)</label>
+                  <input type="text" class="form-control" id="cpHeroTitle" value="${escapeHtml(content.heroTitle || 'Sistem Informasi Telaah Modul Ajar Berbasis')}" required />
+                </div>
+                <div class="form-group">
+                  <label>Kata Kunci Gradien (Teks Biru Bercahaya) (ID)</label>
+                  <input type="text" class="form-control" id="cpHeroTitleHighlight" value="${escapeHtml(content.heroTitleHighlight || 'Pembelajaran Mendalam')}" required />
+                </div>
+              </div>
+
+              <div class="grid-2">
+                <div class="form-group">
+                  <label>Judul Baris 1 (Teks Putih) (EN)</label>
+                  <input type="text" class="form-control" id="cpHeroTitleEn" value="${escapeHtml(content.heroTitle_en || 'Standardized Teaching Module Review Based on')}" required />
+                </div>
+                <div class="form-group">
+                  <label>Kata Kunci Gradien (Teks Biru Bercahaya) (EN)</label>
+                  <input type="text" class="form-control" id="cpHeroTitleHighlightEn" value="${escapeHtml(content.heroTitleHighlight_en || 'Deep Learning')}" required />
+                </div>
               </div>
 
               <div class="form-group">
-                <label>Judul Utama Hero Banner (EN)</label>
-                <input type="text" class="form-control" id="cpHeroTitleEn" value="${escapeHtml(content.heroTitle_en || '')}" required />
-              </div>
-
-              <div class="form-group">
-                <label>Deskripsi Subjudul Hero Banner (ID)</label>
+                <label>Deskripsi Paragraf Hero Banner (ID)</label>
                 <textarea class="form-control" id="cpHeroDesc" rows="3" required>${escapeHtml(content.heroDesc || '')}</textarea>
               </div>
 
               <div class="form-group">
-                <label>Deskripsi Subjudul Hero Banner (EN)</label>
+                <label>Deskripsi Paragraf Hero Banner (EN)</label>
                 <textarea class="form-control" id="cpHeroDescEn" rows="3" required>${escapeHtml(content.heroDesc_en || '')}</textarea>
+              </div>
+
+              <div class="grid-2">
+                <div class="form-group">
+                  <label>Label Tombol Masuk Portal (ID)</label>
+                  <input type="text" class="form-control" id="cpHeroBtnLogin" value="${escapeHtml(content.heroBtnLogin || 'Masuk ke Aplikasi Portal')}" required />
+                </div>
+                <div class="form-group">
+                  <label>Label Tombol Galeri Kampus (ID)</label>
+                  <input type="text" class="form-control" id="cpHeroBtnGallery" value="${escapeHtml(content.heroBtnGallery || '📸 Galeri Kampus')}" required />
+                </div>
               </div>
 
               <hr style="margin:24px 0; border:none; border-top:1px solid var(--border-color);" />
@@ -2216,26 +2250,27 @@
               <!-- Main Building Interactive Photo Pill -->
               <div class="landing-building-pill" onclick="openPhotoModal('gedung-utama-smkn.jpg', 'Gedung Utama SMK Negeri Wonosalam', 'Panorama megah Gedung Utama dan Lapangan Upacara SMK Negeri Wonosalam berlatar Gunung Anjasmoro di Wonosalam, Jombang, Jawa Timur.', 'Gedung Utama & Kampus')" title="Klik untuk melihat foto Gedung Utama SMKN Wonosalam">
                 <span class="landing-pulse-badge"></span>
-                <span>🏛️ <b>Gedung Utama &amp; Kampus SMKN Wonosalam</b> (Lereng Gn. Anjasmoro)</span>
+                <span>${escapeHtml(isEn ? (content.heroBuildingPill_en || content.heroBuildingPill || '🏛️ Gedung Utama & Kampus SMKN Wonosalam (Lereng Gn. Anjasmoro)') : (content.heroBuildingPill || '🏛️ Gedung Utama & Kampus SMKN Wonosalam (Lereng Gn. Anjasmoro)'))}</span>
                 <span class="landing-view-hint">Foto HD ↗</span>
               </div>
 
               <h1 class="landing-hero-title">
-                ${escapeHtml(isEn ? (content.heroTitle_en || content.heroTitle || 'Sistem Informasi Telaah Modul Ajar Berbasis Pembelajaran Mendalam') : (content.heroTitle || 'Sistem Informasi Telaah Modul Ajar Berbasis Pembelajaran Mendalam'))}
+                ${escapeHtml(isEn ? (content.heroTitle_en || 'Standardized Teaching Module Review Based on') : (content.heroTitle || 'Sistem Informasi Telaah Modul Ajar Berbasis'))}
+                <span class="landing-gradient-text">${escapeHtml(isEn ? (content.heroTitleHighlight_en || 'Deep Learning') : (content.heroTitleHighlight || 'Pembelajaran Mendalam'))}</span>
               </h1>
 
               <p class="landing-hero-desc">
-                ${escapeHtml(isEn ? (content.heroDesc_en || content.heroDesc || '') : (content.heroDesc || ''))}
+                ${escapeHtml(isEn ? (content.heroDesc_en || '') : (content.heroDesc || ''))}
               </p>
 
               <div class="landing-cta-row">
                 <button class="landing-btn landing-btn-primary" onclick="navigateTo('login')">
                   <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"></line></svg>
-                  ${isEn ? 'Open Official Portal / Login' : 'Masuk ke Aplikasi Portal'}
+                  ${escapeHtml(isEn ? (content.heroBtnLogin_en || 'Open Official Portal / Login') : (content.heroBtnLogin || 'Masuk ke Aplikasi Portal'))}
                 </button>
 
                 <button class="landing-btn landing-btn-outline" onclick="scrollToLandingSection('galeri-section')">
-                  📸 ${isEn ? 'Campus Gallery' : 'Galeri Kampus'}
+                  ${escapeHtml(isEn ? (content.heroBtnGallery_en || '📸 Campus Gallery') : (content.heroBtnGallery || '📸 Galeri Kampus'))}
                 </button>
               </div>
 
@@ -4524,10 +4559,16 @@
     if (!state.landingContent) state.landingContent = {};
     state.landingContent.heroBadge = document.getElementById('cpHeroBadge').value.trim();
     state.landingContent.heroBadge_en = document.getElementById('cpHeroBadgeEn').value.trim();
+    state.landingContent.heroBuildingPill = document.getElementById('cpHeroBuildingPill').value.trim();
+    state.landingContent.heroBuildingPill_en = document.getElementById('cpHeroBuildingPillEn').value.trim();
     state.landingContent.heroTitle = document.getElementById('cpHeroTitle').value.trim();
     state.landingContent.heroTitle_en = document.getElementById('cpHeroTitleEn').value.trim();
+    state.landingContent.heroTitleHighlight = document.getElementById('cpHeroTitleHighlight').value.trim();
+    state.landingContent.heroTitleHighlight_en = document.getElementById('cpHeroTitleHighlightEn').value.trim();
     state.landingContent.heroDesc = document.getElementById('cpHeroDesc').value.trim();
     state.landingContent.heroDesc_en = document.getElementById('cpHeroDescEn').value.trim();
+    state.landingContent.heroBtnLogin = document.getElementById('cpHeroBtnLogin').value.trim();
+    state.landingContent.heroBtnGallery = document.getElementById('cpHeroBtnGallery').value.trim();
     state.landingContent.innovatorName = document.getElementById('cpInnovatorName').value.trim();
     state.landingContent.innovatorRole = document.getElementById('cpInnovatorRole').value.trim();
     state.landingContent.innovatorQuote = document.getElementById('cpInnovatorQuote').value.trim();
