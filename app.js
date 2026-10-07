@@ -4,7 +4,7 @@
 
 (function () {
   // Version Guard: Otomatis membersihkan cache localStorage jika versi aplikasi diperbarui, tapi pertahankan kredensial Supabase & sesi user
-  const APP_VERSION = '2026.10.04.v26';
+  const APP_VERSION = '2026.10.07.v27';
   if (localStorage.getItem('sitama_app_version') !== APP_VERSION) {
     const savedSbUrl = localStorage.getItem('sitama_supabase_url');
     const savedSbKey = localStorage.getItem('sitama_supabase_anon_key');
@@ -56,7 +56,7 @@
     currentView: 'landing', // Selalu arahkan pengunjung ke Landing Page saat membuka aplikasi
     selectedModuleId: getStoredData('selectedModuleId', 'MOD-001'),
     
-    school: initialMockData.school,
+    school: getStoredData('school', initialMockData.school),
     departments: initialMockData.departments,
     users: getStoredData('users', initialMockData.users),
     academicYears: getStoredData('academicYears', initialMockData.academicYears),
@@ -66,6 +66,14 @@
     notifications: getStoredData('notifications', initialMockData.notifications),
     auditLogs: getStoredData('auditLogs', initialMockData.auditLogs),
     
+    // cPanel Web State (Kelola Menu, Teks, & Galeri)
+    landingMenus: getStoredData('landingMenus', initialMockData.initialLandingMenus),
+    landingContent: getStoredData('landingContent', initialMockData.initialLandingContent),
+    landingGallery: getStoredData('landingGallery', initialMockData.initialLandingGallery),
+    cpanelTab: 'menus', // 'menus' | 'content' | 'gallery' | 'settings'
+    cpanelEditingMenuId: null,
+    activeCustomModal: null,
+
     // Auth Tab & Password Recovery State
     authTab: 'login', // 'login' | 'register' | 'forgot'
     loginPresetUser: '',
@@ -83,7 +91,7 @@
     
     // Modals and Active Workspace
     reviewDraftScores: {},
-    activeModal: null, // null | 'new_user_admin' | 'tendik_verify'
+    activeModal: null, // null | 'new_user_admin' | 'tendik_verify' | 'cpanel_menu_form' | 'cpanel_gallery_form' | 'landing_custom_info'
     showLoginModal: false, // true = tampilkan login modal popup di atas landing page
     selectedVerifyModId: null,
     showNotifDropdown: false
@@ -108,7 +116,11 @@
     setStoredData('currentView', state.currentView);
     setStoredData('modules', state.modules);
     setStoredData('users', state.users);
+    setStoredData('school', state.school);
     setStoredData('notifications', state.notifications);
+    setStoredData('landingMenus', state.landingMenus);
+    setStoredData('landingContent', state.landingContent);
+    setStoredData('landingGallery', state.landingGallery);
   }
 
   // Add Audit Trail Record
@@ -295,6 +307,7 @@
       items.push({ view: 'user_management', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>', label: t('menuUserManagement') });
       items.push({ view: 'master_data', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>', label: t('menuMasterData') });
       items.push({ view: 'rubric_management', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>', label: t('menuRubric') });
+      items.push({ view: 'cpanel', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>', label: t('menuCPanel') || 'cPanel Web (Kelola Web)' });
       items.push({ view: 'modules', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>', label: t('menuModules') });
       items.push({ view: 'reports', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>', label: t('menuReports') });
       items.push({ view: 'audit_logs', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', label: t('menuAuditLog') });
@@ -371,6 +384,8 @@
         return renderMasterDataPage();
       case 'rubric_management':
         return renderRubricManagementPage();
+      case 'cpanel':
+        return renderCPanelPage();
       case 'audit_logs':
         return renderAuditLogsPage();
       case 'profile':
@@ -1475,8 +1490,306 @@
           </table>
         </div>
       </div>
+
+      <!-- Banner Jalan Pintas ke cPanel Web -->
+      <div class="card" style="margin-top:20px; background:linear-gradient(135deg, #0A1128 0%, #101F42 40%, #1E3A8A 100%); color:#FFFFFF; padding:22px 26px; border-radius:var(--radius-xl); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; border:1px solid rgba(255,255,255,0.15); box-shadow:0 10px 25px rgba(10,17,40,0.25);">
+        <div>
+          <div style="font-weight:800; font-size:1.15rem; display:flex; align-items:center; gap:8px;">
+            <span>⚙️</span> cPanel Web (Kelola Menu &amp; Konten Landing Page)
+          </div>
+          <p style="font-size:0.85rem; color:#CBD5E1; margin:4px 0 0 0; max-width:650px;">
+            Tambah atau ubah menu navbar beranda, edit teks judul &amp; sambutan kepala sekolah, serta kelola galeri foto kampus secara mandiri tanpa coding.
+          </p>
+        </div>
+        <button type="button" class="btn btn-warning" onclick="navigateTo('cpanel')" style="font-weight:700; padding:10px 20px;">
+          Buka cPanel Web →
+        </button>
+      </div>
     `;
   }
+
+  /* ------------------- CPANEL WEB / SITE & MENU MANAGER ------------------- */
+  function renderCPanelPage() {
+    const menus = state.landingMenus || [];
+    const content = state.landingContent || {};
+    const gallery = state.landingGallery || [];
+    const school = state.school || {};
+
+    return `
+      <div class="cpanel-wrapper">
+        <!-- Header -->
+        <div class="cpanel-banner">
+          <div>
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;">
+              <span style="font-size:1.8rem;">⚙️</span>
+              <h1 style="font-size:1.5rem; font-weight:800; color:#FFFFFF; margin:0; letter-spacing:-0.02em;">cPanel Web SITAMA-DEEP</h1>
+              <span class="badge" style="background:#10B981; color:#fff; font-size:0.75rem; font-weight:700;">Site Manager Active</span>
+            </div>
+            <p style="font-size:0.86rem; color:#CBD5E1; margin:0; line-height:1.5;">
+              Pusat kendali mandiri untuk mengedit menu navigasi, teks landing page, galeri kampus, dan identitas situs SMKN Wonosalam.
+            </p>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <button type="button" class="btn btn-outline" style="color:#FFFFFF; border-color:rgba(255,255,255,0.4); background:rgba(255,255,255,0.12); display:inline-flex; align-items:center; gap:6px; font-weight:600;" onclick="navigateTo('landing')">
+              👁️ Lihat Hasil di Beranda
+            </button>
+            <button type="button" class="btn btn-danger" style="display:inline-flex; align-items:center; gap:6px; font-weight:600;" onclick="handleResetCPanelToDefault()" title="Kembalikan semua menu dan teks ke setelan bawaan">
+              🔄 Reset ke Default
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab Nav -->
+        <div class="cpanel-nav-tabs">
+          <button type="button" class="cpanel-tab-btn ${state.cpanelTab === 'menus' ? 'active' : ''}" onclick="setCPanelTab('menus')">
+            🧭 1. Menu Navigasi (${menus.length})
+          </button>
+          <button type="button" class="cpanel-tab-btn ${state.cpanelTab === 'content' ? 'active' : ''}" onclick="setCPanelTab('content')">
+            ✍️ 2. Teks &amp; Banner Beranda
+          </button>
+          <button type="button" class="cpanel-tab-btn ${state.cpanelTab === 'gallery' ? 'active' : ''}" onclick="setCPanelTab('gallery')">
+            📸 3. Galeri Foto Kampus (${gallery.length})
+          </button>
+          <button type="button" class="cpanel-tab-btn ${state.cpanelTab === 'settings' ? 'active' : ''}" onclick="setCPanelTab('settings')">
+            🏫 4. Identitas &amp; Kontak Sekolah
+          </button>
+        </div>
+
+        <!-- TAB 1: MENU NAVIGASI -->
+        ${state.cpanelTab === 'menus' ? `
+          <div class="card" style="margin-top:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:10px;">
+              <div>
+                <h3 style="font-size:1.15rem; font-weight:800; color:var(--text-main); margin:0;">Daftar Menu Navigasi Header</h3>
+                <p style="font-size:0.82rem; color:var(--text-muted); margin:4px 0 0 0;">
+                  Atur menu-menu yang tampil di bar navigasi atas halaman depan (Landing Page).
+                </p>
+              </div>
+              <button type="button" class="btn btn-primary" onclick="openAddMenuModal()" style="display:inline-flex; align-items:center; gap:6px;">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Tambah Menu Baru
+              </button>
+            </div>
+
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th style="width:50px; text-align:center;">#</th>
+                    <th>Nama Menu (ID / EN)</th>
+                    <th>Tipe Aksi</th>
+                    <th>Target / Tautan</th>
+                    <th style="width:100px; text-align:center;">Status</th>
+                    <th style="width:180px; text-align:center;">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${menus.map((m, idx) => `
+                    <tr>
+                      <td style="text-align:center; font-weight:700; color:var(--text-muted);">${idx + 1}</td>
+                      <td>
+                        <div style="font-weight:700; color:var(--text-main);">${escapeHtml(m.label)}</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted);">EN: ${escapeHtml(m.label_en || m.label)}</div>
+                      </td>
+                      <td>
+                        ${m.type === 'link' 
+                          ? '<span class="badge" style="background:#ECFDF5; color:#047857;">🔗 Link Luar</span>' 
+                          : m.type === 'custom_modal'
+                            ? '<span class="badge" style="background:#F5F3FF; color:#6D28D9;">📄 Pop-up Info</span>'
+                            : '<span class="badge" style="background:#EFF6FF; color:#1D4ED8;">⚓ Scroll Bagian</span>'
+                        }
+                      </td>
+                      <td>
+                        <code style="font-size:0.78rem; background:#F1F5F9; padding:2px 6px; border-radius:4px; color:#334155;">
+                          ${escapeHtml(m.type === 'link' ? m.url : (m.type === 'custom_modal' ? 'Modal: ' + (m.modalTitle || m.label) : '#' + m.target))}
+                        </code>
+                      </td>
+                      <td style="text-align:center;">
+                        <button type="button" onclick="handleToggleMenuEnabled('${m.id}')" class="btn btn-sm ${m.enabled ? 'btn-success' : 'btn-outline'}" style="font-size:0.72rem; padding:3px 8px;" title="Klik untuk ${m.enabled ? 'sembunyikan' : 'tampilkan'}">
+                          ${m.enabled ? '✓ Aktif' : 'Off'}
+                        </button>
+                      </td>
+                      <td style="text-align:center;">
+                        <div style="display:inline-flex; gap:4px;">
+                          <button type="button" class="btn btn-outline btn-sm" onclick="handleMoveMenu('${m.id}', -1)" ${idx === 0 ? 'disabled' : ''} title="Geser Naik" style="padding:3px 7px;">▲</button>
+                          <button type="button" class="btn btn-outline btn-sm" onclick="handleMoveMenu('${m.id}', 1)" ${idx === menus.length - 1 ? 'disabled' : ''} title="Geser Turun" style="padding:3px 7px;">▼</button>
+                          <button type="button" class="btn btn-outline btn-sm" onclick="openEditMenuModal('${m.id}')" title="Edit Menu" style="padding:3px 7px;">✏️</button>
+                          <button type="button" class="btn btn-danger btn-sm" onclick="handleDeleteMenu('${m.id}')" title="Hapus Menu" style="padding:3px 7px;">🗑️</button>
+                        </div>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- TAB 2: TEKS & BANNER BERANDA -->
+        ${state.cpanelTab === 'content' ? `
+          <div class="card" style="margin-top:20px;">
+            <div style="margin-bottom:18px;">
+              <h3 style="font-size:1.15rem; font-weight:800; color:var(--text-main); margin:0;">Editor Konten Teks &amp; Banner Utama</h3>
+              <p style="font-size:0.82rem; color:var(--text-muted); margin:4px 0 0 0;">
+                Ubah judul, narasi inovasi, dan pesan kepala sekolah secara instan tanpa menyentuh kode.
+              </p>
+            </div>
+
+            <form onsubmit="handleSaveLandingContent(event)">
+              <div class="grid-2">
+                <div class="form-group">
+                  <label>Teks Badge Inovasi (ID)</label>
+                  <input type="text" class="form-control" id="cpHeroBadge" value="${escapeHtml(content.heroBadge || '')}" required />
+                </div>
+                <div class="form-group">
+                  <label>Teks Badge Inovasi (EN)</label>
+                  <input type="text" class="form-control" id="cpHeroBadgeEn" value="${escapeHtml(content.heroBadge_en || '')}" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Judul Utama Hero Banner (ID)</label>
+                <input type="text" class="form-control" id="cpHeroTitle" value="${escapeHtml(content.heroTitle || '')}" required />
+              </div>
+
+              <div class="form-group">
+                <label>Judul Utama Hero Banner (EN)</label>
+                <input type="text" class="form-control" id="cpHeroTitleEn" value="${escapeHtml(content.heroTitle_en || '')}" required />
+              </div>
+
+              <div class="form-group">
+                <label>Deskripsi Subjudul Hero Banner (ID)</label>
+                <textarea class="form-control" id="cpHeroDesc" rows="3" required>${escapeHtml(content.heroDesc || '')}</textarea>
+              </div>
+
+              <div class="form-group">
+                <label>Deskripsi Subjudul Hero Banner (EN)</label>
+                <textarea class="form-control" id="cpHeroDescEn" rows="3" required>${escapeHtml(content.heroDesc_en || '')}</textarea>
+              </div>
+
+              <hr style="margin:24px 0; border:none; border-top:1px solid var(--border-color);" />
+
+              <h4 style="font-size:1rem; font-weight:700; color:var(--primary-dark); margin-bottom:14px;">Sambutan &amp; Inovator (Kepala Sekolah)</h4>
+              <div class="grid-2">
+                <div class="form-group">
+                  <label>Nama Inovator / Kepala Sekolah</label>
+                  <input type="text" class="form-control" id="cpInnovatorName" value="${escapeHtml(content.innovatorName || 'Sudarso, S.Pd.')}" required />
+                </div>
+                <div class="form-group">
+                  <label>Jabatan</label>
+                  <input type="text" class="form-control" id="cpInnovatorRole" value="${escapeHtml(content.innovatorRole || 'Kepala SMK Negeri Wonosalam')}" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Kutipan Filosofi Pembelajaran Mendalam (Deep Learning)</label>
+                <textarea class="form-control" id="cpInnovatorQuote" rows="3" required>${escapeHtml(content.innovatorQuote || '')}</textarea>
+              </div>
+
+              <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                <button type="submit" class="btn btn-primary" style="padding:10px 22px; font-weight:700;">
+                  💾 Simpan Perubahan Teks
+                </button>
+              </div>
+            </form>
+          </div>
+        ` : ''}
+
+        <!-- TAB 3: GALERI FOTO KAMPUS -->
+        ${state.cpanelTab === 'gallery' ? `
+          <div class="card" style="margin-top:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:10px;">
+              <div>
+                <h3 style="font-size:1.15rem; font-weight:800; color:var(--text-main); margin:0;">Kelola Dokumentasi Galeri Kampus</h3>
+                <p style="font-size:0.82rem; color:var(--text-muted); margin:4px 0 0 0;">
+                  Foto-foto yang ditampilkan pada seksi Galeri Kampus SMKN Wonosalam di Beranda.
+                </p>
+              </div>
+              <button type="button" class="btn btn-primary" onclick="openAddGalleryModal()" style="display:inline-flex; align-items:center; gap:6px;">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Tambah Foto Baru
+              </button>
+            </div>
+
+            <div class="grid-2">
+              ${gallery.map(item => `
+                <div class="card" style="border:1px solid var(--border-color); padding:14px; display:flex; gap:14px; align-items:flex-start;">
+                  <img src="${escapeHtml(item.src)}" alt="${escapeHtml(item.title)}" style="width:110px; height:80px; object-fit:cover; border-radius:8px; border:1px solid #CBD5E1;" onerror="this.src='gedung-utama-smkn.jpg'"/>
+                  <div style="flex:1;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                      <span class="badge" style="background:#EFF6FF; color:#1D4ED8; font-size:0.72rem;">${escapeHtml(item.tag || 'Dokumentasi')}</span>
+                      <button type="button" class="btn btn-danger btn-sm" onclick="handleDeleteGalleryItem('${item.id}')" style="padding:2px 8px; font-size:0.72rem;" title="Hapus Foto">🗑️ Hapus</button>
+                    </div>
+                    <div style="font-weight:700; font-size:0.92rem; color:var(--text-main); margin-top:4px;">${escapeHtml(item.title)}</div>
+                    <div style="font-size:0.78rem; color:var(--text-muted); margin-top:4px; line-height:1.4;">${escapeHtml(item.desc)}</div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- TAB 4: IDENTITAS & KONTAK SEKOLAH -->
+        ${state.cpanelTab === 'settings' ? `
+          <div class="card" style="margin-top:20px;">
+            <div style="margin-bottom:18px;">
+              <h3 style="font-size:1.15rem; font-weight:800; color:var(--text-main); margin:0;">Identitas Resmi Satuan Pendidikan</h3>
+              <p style="font-size:0.82rem; color:var(--text-muted); margin:4px 0 0 0;">
+                Informasi sekolah yang tercetak pada kop surat, laporan telaah, dan footer portal.
+              </p>
+            </div>
+
+            <form onsubmit="handleSaveSchoolSettings(event)">
+              <div class="grid-2">
+                <div class="form-group">
+                  <label>Nama Resmi Sekolah</label>
+                  <input type="text" class="form-control" id="cpSchoolName" value="${escapeHtml(school.school_name || 'SMK NEGERI WONOSALAM')}" required />
+                </div>
+                <div class="form-group">
+                  <label>NPSN</label>
+                  <input type="text" class="form-control" id="cpSchoolNpsn" value="${escapeHtml(school.npsn || '20503412')}" required />
+                </div>
+              </div>
+
+              <div class="grid-2">
+                <div class="form-group">
+                  <label>Cabang Dinas Pendidikan</label>
+                  <input type="text" class="form-control" id="cpSchoolCabdin" value="${escapeHtml(school.cabdin || 'Cabang Dinas Pendidikan Wilayah Kabupaten Jombang')}" required />
+                </div>
+                <div class="form-group">
+                  <label>File / URL Logo Sekolah</label>
+                  <input type="text" class="form-control" id="cpSchoolLogo" value="${escapeHtml(school.logo || 'logo.png')}" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Alamat Lengkap</label>
+                <input type="text" class="form-control" id="cpSchoolAddress" value="${escapeHtml(school.address || '')}" required />
+              </div>
+
+              <div class="grid-2">
+                <div class="form-group">
+                  <label>Nomor Telepon / WA Resmi</label>
+                  <input type="text" class="form-control" id="cpSchoolPhone" value="${escapeHtml(school.phone || '')}" required />
+                </div>
+                <div class="form-group">
+                  <label>Alamat Email Resmi</label>
+                  <input type="email" class="form-control" id="cpSchoolEmail" value="${escapeHtml(school.email || '')}" required />
+                </div>
+              </div>
+
+              <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                <button type="submit" class="btn btn-primary" style="padding:10px 22px; font-weight:700;">
+                  💾 Simpan Identitas Sekolah
+                </button>
+              </div>
+            </form>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
+
 
   /* ------------------- DASHBOARD TENDIK & BUKU KENDALI ------------------- */
   function renderTendikDashboard() {
@@ -1835,6 +2148,8 @@
   /* ------------------- OFFICIAL PUBLIC LANDING PAGE (GEMPITA 2026) ------------------- */
   function renderLandingPage() {
     const isEn = state.lang === 'en';
+    const content = state.landingContent || {};
+    const currentUser = getCurrentUser();
     
     return `
       <div class="landing-page">
@@ -1851,21 +2166,31 @@
                 SITAMA-DEEP
                 <span class="landing-brand-badge">GEMPITA 2026</span>
               </div>
-              <div class="landing-brand-sub">SMK Negeri Wonosalam • Cabdin Jombang</div>
+              <div class="landing-brand-sub">${escapeHtml(state.school.school_name || 'SMK Negeri Wonosalam')} • ${escapeHtml(state.school.cabdin || 'Cabdin Jombang')}</div>
             </div>
           </div>
 
           <ul class="landing-nav-links">
-            <li><a onclick="scrollToLandingTop()">${isEn ? 'Home' : 'Beranda'}</a></li>
-            <li><a onclick="scrollToLandingSection('galeri-section')">${isEn ? 'Campus Gallery' : 'Galeri Kampus'}</a></li>
-            <li><a onclick="scrollToLandingSection('deep-learning-section')">Deep Learning</a></li>
-            <li><a onclick="scrollToLandingSection('ekosistem-section')">${isEn ? '4 Roles' : '4 Akun'}</a></li>
-            <li><a onclick="scrollToLandingSection('rubrik-section')">${isEn ? 'Rubric 47' : 'Rubrik 47'}</a></li>
-            <li><a onclick="scrollToLandingSection('dokumen-section')">${isEn ? 'Docs' : 'Dokumen'}</a></li>
-            <li><a onclick="scrollToLandingSection('inovator-section')">${isEn ? 'Innovator' : 'Inovator'}</a></li>
+            ${(state.landingMenus || []).filter(m => m.enabled).map(m => {
+              const label = isEn ? (m.label_en || m.label) : m.label;
+              if (m.type === 'link') {
+                return `<li><a href="${escapeHtml(m.url)}" target="_blank" rel="noopener">${escapeHtml(label)} ↗</a></li>`;
+              } else if (m.type === 'custom_modal') {
+                return `<li><a onclick="openLandingCustomModal('${escapeHtml(m.id)}')">${escapeHtml(label)}</a></li>`;
+              } else {
+                return `<li><a onclick="scrollToLandingSection('${escapeHtml(m.target)}')">${escapeHtml(label)}</a></li>`;
+              }
+            }).join('')}
           </ul>
 
           <div class="landing-nav-actions">
+            <!-- Admin cPanel Shortcut Button (if logged in as admin) -->
+            ${currentUser && currentUser.role === 'admin' ? `
+              <button class="landing-btn landing-btn-outline landing-btn-sm" onclick="navigateTo('cpanel')" title="Buka cPanel Web untuk edit menu dan teks" style="border-color:#F59E0B; color:#FBBF24; display:inline-flex; align-items:center; gap:5px; font-weight:700;">
+                ⚙️ cPanel Web
+              </button>
+            ` : ''}
+
             <!-- Language Switcher -->
             <button class="landing-btn landing-btn-outline landing-btn-sm" onclick="toggleLandingLang()" title="Ganti Bahasa">
               🌐 ${state.lang.toUpperCase()}
@@ -1885,26 +2210,22 @@
             <div class="landing-hero-left">
               <div class="landing-pill">
                 <span>🏅</span>
-                <span>${isEn ? 'GEMPITA 2026 Best Practice Innovation • Cabdin Jombang' : 'Inovasi Praktik Baik GEMPITA 2026 • Cabdin Jombang'}</span>
+                <span>${escapeHtml(isEn ? (content.heroBadge_en || content.heroBadge || 'Inovasi Praktik Baik GEMPITA 2026') : (content.heroBadge || 'Inovasi Praktik Baik GEMPITA 2026'))}</span>
               </div>
 
               <!-- Main Building Interactive Photo Pill -->
               <div class="landing-building-pill" onclick="openPhotoModal('gedung-utama-smkn.jpg', 'Gedung Utama SMK Negeri Wonosalam', 'Panorama megah Gedung Utama dan Lapangan Upacara SMK Negeri Wonosalam berlatar Gunung Anjasmoro di Wonosalam, Jombang, Jawa Timur.', 'Gedung Utama & Kampus')" title="Klik untuk melihat foto Gedung Utama SMKN Wonosalam">
                 <span class="landing-pulse-badge"></span>
-                <span>🏛️ <b>Gedung Utama & Kampus SMKN Wonosalam</b> (Lereng Gn. Anjasmoro)</span>
+                <span>🏛️ <b>Gedung Utama &amp; Kampus SMKN Wonosalam</b> (Lereng Gn. Anjasmoro)</span>
                 <span class="landing-view-hint">Foto HD ↗</span>
               </div>
 
               <h1 class="landing-hero-title">
-                ${isEn 
-                  ? 'Standardized Teaching Module Review Based on <span class="landing-gradient-text">Deep Learning</span>' 
-                  : 'Sistem Informasi Telaah Modul Ajar Berbasis <span class="landing-gradient-text">Pembelajaran Mendalam</span>'}
+                ${escapeHtml(isEn ? (content.heroTitle_en || content.heroTitle || 'Sistem Informasi Telaah Modul Ajar Berbasis Pembelajaran Mendalam') : (content.heroTitle || 'Sistem Informasi Telaah Modul Ajar Berbasis Pembelajaran Mendalam'))}
               </h1>
 
               <p class="landing-hero-desc">
-                ${isEn
-                  ? 'Digital quality assurance platform for instructional planning at SMK Negeri Wonosalam. Connecting Principals, Curriculum Coordinators, Vocational Teachers, and Administrative Staff with 47 standardized Deep Learning indicators (Mindful, Meaningful, Joyful).'
-                  : 'Platform digital penjaminan mutu perencanaan pembelajaran di SMK Negeri Wonosalam. Menghubungkan Kepala Sekolah, Waka Kurikulum, Guru Pengampu Kejuruan, dan Tenaga Kependidikan dalam ekosistem telaah terstandar 47 Indikator Deep Learning (Mindful, Meaningful, Joyful).'}
+                ${escapeHtml(isEn ? (content.heroDesc_en || content.heroDesc || '') : (content.heroDesc || ''))}
               </p>
 
               <div class="landing-cta-row">
@@ -2037,221 +2358,36 @@
         </div>
 
         <div class="landing-gallery-grid">
-          <!-- Card 1: Gedung Utama -->
-          <div class="landing-gallery-card" onclick="openPhotoModal('gedung-utama-smkn.jpg', '${isEn ? 'Main Building of SMKN Wonosalam' : 'Gedung Utama SMK Negeri Wonosalam'}', '${isEn ? 'Magnificent panorama of the Main Building and Courtyard of SMK Negeri Wonosalam set against Mount Anjasmoro in Wonosalam, Jombang, East Java.' : 'Panorama megah Gedung Utama dan Lapangan Upacara SMK Negeri Wonosalam berlatar Gunung Anjasmoro di Wonosalam, Jombang, Jawa Timur.'}', '${isEn ? 'Campus Architecture' : 'Gedung Utama & Kampus'}')">
-            <div class="landing-gallery-img-wrap">
-              <span class="landing-gallery-badge">${isEn ? 'Main Building' : 'Gedung Utama'}</span>
-              <img src="gedung-utama-smkn.jpg" alt="Gedung Utama SMK Negeri Wonosalam" loading="lazy" />
-              <div class="landing-gallery-expand-hint">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                ${isEn ? 'Expand HD' : 'Perbesar HD'}
+          ${(state.landingGallery || []).map((item, idx) => {
+            const title = isEn ? (item.title_en || item.title) : item.title;
+            const desc = isEn ? (item.desc_en || item.desc) : item.desc;
+            const tag = escapeHtml(item.tag || 'Galeri Kampus');
+            const safeTitle = escapeHtml(title).replace(/'/g, "\\'");
+            const safeDesc = escapeHtml(desc).replace(/'/g, "\\'");
+            const safeTag = escapeHtml(tag).replace(/'/g, "\\'");
+            return `
+              <div class="landing-gallery-card" onclick="openPhotoModal('${escapeHtml(item.src)}', '${safeTitle}', '${safeDesc}', '${safeTag}')">
+                <div class="landing-gallery-img-wrap">
+                  <span class="landing-gallery-badge">${tag}</span>
+                  <img src="${escapeHtml(item.src)}" alt="${escapeHtml(title)}" loading="lazy" onerror="this.src='gedung-utama-smkn.jpg'" />
+                  <div class="landing-gallery-expand-hint">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                    ${isEn ? 'Expand HD' : 'Perbesar HD'}
+                  </div>
+                </div>
+                <div class="landing-gallery-body">
+                  <div class="landing-gallery-title">${escapeHtml(title)}</div>
+                  <div class="landing-gallery-desc">
+                    ${escapeHtml(desc)}
+                  </div>
+                  <div class="landing-gallery-meta">
+                    <span>📸 ${tag}</span>
+                    <span style="color:#38BDF8; font-weight:600;">${isEn ? 'View HD ↗' : 'Lihat Foto ↗'}</span>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div class="landing-gallery-body">
-              <div class="landing-gallery-title">${isEn ? 'Main Campus at Mount Anjasmoro' : 'Gedung Utama di Lereng Gn. Anjasmoro'}</div>
-              <div class="landing-gallery-desc">
-                ${isEn 
-                  ? 'The main building complex and ceremonial plaza of SMKN Wonosalam surrounded by lush tropical greenery, offering a serene and focused learning environment.'
-                  : 'Kompleks gedung utama dan lapangan upacara SMK Negeri Wonosalam yang asri dan sejuk, menghadirkan lingkungan belajar kondusif.'}
-              </div>
-              <div class="landing-gallery-meta">
-                <span>🏛️ Jl. Anjasmoro, Jombang</span>
-                <span style="color:#38BDF8; font-weight:600;">${isEn ? 'View HD ↗' : 'Lihat Foto ↗'}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Card 2: Halaman & Monumen Sekolah -->
-          <div class="landing-gallery-card" onclick="openPhotoModal('foto-kampus-lapangan.jpg', '${isEn ? 'School Courtyard & Monument' : 'Halaman & Monumen SMK Negeri Wonosalam'}', '${isEn ? 'School ceremony plaza with the official SMK Negeri Wonosalam stone monument and student cultural arts performance.' : 'Lapangan upacara dengan monumen kebanggaan sekolah SMK Negeri Wonosalam serta atraksi seni budaya peserta didik.'}', '${isEn ? 'School Monument' : 'Monumen Resmi'}')">
-            <div class="landing-gallery-img-wrap">
-              <span class="landing-gallery-badge">${isEn ? 'Monument' : 'Monumen Sekolah'}</span>
-              <img src="foto-kampus-lapangan.jpg" alt="Lapangan & Monumen SMKN Wonosalam" loading="lazy" />
-              <div class="landing-gallery-expand-hint">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                ${isEn ? 'Expand HD' : 'Perbesar HD'}
-              </div>
-            </div>
-            <div class="landing-gallery-body">
-              <div class="landing-gallery-title">${isEn ? 'Plaza & Iconic School Monument' : 'Halaman & Monumen Ikonik Sekolah'}</div>
-              <div class="landing-gallery-desc">
-                ${isEn
-                  ? 'The stone landmark bearing &quot;SMK NEGERI WONOSALAM&quot; as the pride of the school community and a stage for student artistic celebration.'
-                  : 'Monumen bertuliskan &quot;SMK NEGERI WONOSALAM&quot; yang menjadi landmark kebanggaan warga sekolah dan panggung kreasi bakat siswa.'}
-              </div>
-              <div class="landing-gallery-meta">
-                <span>🏅 Landmark Kampus</span>
-                <span style="color:#38BDF8; font-weight:600;">${isEn ? 'View HD ↗' : 'Lihat Foto ↗'}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Card 3: Paskibra PRASNEWS -->
-          <div class="landing-gallery-card" onclick="openPhotoModal('foto-paskibra-kampus.jpg', '${isEn ? 'PRASNEWS Flag Bearers' : 'Paskibra PRASNEWS SMKN Wonosalam'}', '${isEn ? 'Flag-raising troop (PRASNEWS) marching with discipline in the school courtyard with reflective artistic presentation.' : 'Pasukan Pengibar Bendera SMK Negeri Wonosalam (PRASNEWS) berbaris tegap dengan disiplin di lapangan upacara berlatar gedung kelas.'}', '${isEn ? 'Character Building' : 'Karakter & Disiplin'}')">
-            <div class="landing-gallery-img-wrap">
-              <span class="landing-gallery-badge">${isEn ? 'Paskibra PRASNEWS' : 'Paskibra PRASNEWS'}</span>
-              <img src="foto-paskibra-kampus.jpg" alt="Paskibra PRASNEWS SMKN Wonosalam" loading="lazy" />
-              <div class="landing-gallery-expand-hint">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                ${isEn ? 'Expand HD' : 'Perbesar HD'}
-              </div>
-            </div>
-            <div class="landing-gallery-body">
-              <div class="landing-gallery-title">${isEn ? 'Student Discipline & Character' : 'Kedisiplinan & Bintalsik Peserta Didik'}</div>
-              <div class="landing-gallery-desc">
-                ${isEn
-                  ? 'Instilling integrity, rigorous discipline, and mental-physical stamina (Bintalsik) through Paskibra and vocational character building.'
-                  : 'Penanaman karakter integritas, kedisiplinan baris-berbaris, dan pembinaan mental fisik (Bintalsik) yang menjadi ciri khas SMKN Wonosalam.'}
-              </div>
-              <div class="landing-gallery-meta">
-                <span>🇮🇩 PRASNEWS Wonosalam</span>
-                <span style="color:#38BDF8; font-weight:600;">${isEn ? 'View HD ↗' : 'Lihat Foto ↗'}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Card 4: Bengkel Mesin TPM -->
-          <div class="landing-gallery-card" onclick="openPhotoModal('foto-bengkel-pemesinan.jpg', '${isEn ? 'Mechanical Engineering Workshop' : 'Bengkel Konsentrasi Teknik Pemesinan (TPM)'}', '${isEn ? 'Vocational students operating industry-standard Westco milling and lathe machinery adhering to occupational safety standards.' : 'Siswa konsentrasi keahlian Teknik Pemesinan mengoperasikan mesin bubut/milling berstandar industri dengan APD lengkap.'}', '${isEn ? 'Vocational Practice' : 'Praktik Vokasi DUDIKA'}')">
-            <div class="landing-gallery-img-wrap">
-              <span class="landing-gallery-badge">${isEn ? 'Machining Workshop' : 'Teknik Pemesinan'}</span>
-              <img src="foto-bengkel-pemesinan.jpg" alt="Bengkel Teknik Pemesinan SMKN Wonosalam" loading="lazy" />
-              <div class="landing-gallery-expand-hint">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                ${isEn ? 'Expand HD' : 'Perbesar HD'}
-              </div>
-            </div>
-            <div class="landing-gallery-body">
-              <div class="landing-gallery-title">${isEn ? 'Industry Standard Workshops' : 'Bengkel Mesin Standar Industri'}</div>
-              <div class="landing-gallery-desc">
-                ${isEn
-                  ? 'Hands-on vocational practice aligned with industrial standards (DUDIKA), training students in precision machining and safety culture.'
-                  : 'Praktik kejuruan vokasi berstandar industri kerja (DUDIKA), membekali siswa keahlian presisi pemesinan dan budaya mutu K3.'}
-              </div>
-              <div class="landing-gallery-meta">
-                <span>⚙️ Konsentrasi Keahlian TPM</span>
-                <span style="color:#38BDF8; font-weight:600;">${isEn ? 'View HD ↗' : 'Lihat Foto ↗'}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Card 5: SMEKNEWS Studio & Kuliner -->
-          <div class="landing-gallery-card" onclick="openPhotoModal('foto-studio-smeknews.jpg', '${isEn ? 'SMEKNEWS Studio & Culinary' : 'SMEKNEWS Studio & Konsentrasi Kuliner'}', '${isEn ? 'Students in official SMKN Wonosalam uniform and Culinary chef jacket co-hosting an educational broadcast.' : 'Siswi berseragam resmi SMKN Wonosalam dan siswi konsentrasi Kuliner/Tata Boga memandu siniar podcast di SMEKNEWS Studio.'}', '${isEn ? 'Broadcasting & Culinary' : 'Broadcasting & Kuliner'}')">
-            <div class="landing-gallery-img-wrap">
-              <span class="landing-gallery-badge">${isEn ? 'Studio & Culinary' : 'SMEKNEWS Studio'}</span>
-              <img src="foto-studio-smeknews.jpg" alt="SMEKNEWS Studio & Kuliner" loading="lazy" />
-              <div class="landing-gallery-expand-hint">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                ${isEn ? 'Expand HD' : 'Perbesar HD'}
-              </div>
-            </div>
-            <div class="landing-gallery-body">
-              <div class="landing-gallery-title">${isEn ? 'SMEKNEWS Studio & Culinary Arts' : 'SMEKNEWS Studio & Praktik Kuliner'}</div>
-              <div class="landing-gallery-desc">
-                ${isEn
-                  ? 'The school digital podcast studio working in tandem with the Culinary Arts department, honing public speaking and modern creative media skills.'
-                  : 'Studio podcast digital interaktif sekolah bersinergi dengan konsentrasi keahlian Kuliner/Tata Boga mengasah kemampuan komunikasi publik.'}
-              </div>
-              <div class="landing-gallery-meta">
-                <span>🎙️ Studio Kreatif Digital</span>
-                <span style="color:#38BDF8; font-weight:600;">${isEn ? 'View HD ↗' : 'Lihat Foto ↗'}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Card 6: Collaborative Deep Learning -->
-          <div class="landing-gallery-card" onclick="openPhotoModal('foto-pembelajaran-kolaboratif.jpg', '${isEn ? 'Collaborative Deep Learning' : 'Pembelajaran Kolaboratif Deep Learning'}', '${isEn ? 'Students actively discussing contextual project artifacts in class, embodying meaningful and joyful learning.' : 'Siswi berdiskusi aktif menyusun proyek kontekstual di kelas, mewujudkan pembelajaran yang bermakna dan menggembirakan.'}', '${isEn ? 'Classroom Deep Learning' : 'Deep Learning di Kelas'}')">
-            <div class="landing-gallery-img-wrap">
-              <span class="landing-gallery-badge">${isEn ? 'Meaningful & Joyful' : 'Meaningful & Joyful'}</span>
-              <img src="foto-pembelajaran-kolaboratif.jpg" alt="Pembelajaran Kolaboratif Siswi SMKN Wonosalam" loading="lazy" />
-              <div class="landing-gallery-expand-hint">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                ${isEn ? 'Expand HD' : 'Perbesar HD'}
-              </div>
-            </div>
-            <div class="landing-gallery-body">
-              <div class="landing-gallery-title">${isEn ? 'Active Collaborative Learning' : 'Aktivitas Belajar Kolaboratif di Kelas'}</div>
-              <div class="landing-gallery-desc">
-                ${isEn
-                  ? 'Implementation of Meaningful & Joyful Learning: students working together on real-world problem-solving and thematic presentation projects.'
-                  : 'Implementasi pilar Meaningful & Joyful Learning: siswa bekerja sama memecahkan masalah riil dan mempresentasikan proyek tematik.'}
-              </div>
-              <div class="landing-gallery-meta">
-                <span>💡 Active Student Learning</span>
-                <span style="color:#38BDF8; font-weight:600;">${isEn ? 'View HD ↗' : 'Lihat Foto ↗'}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Card 7: Perpustakaan & Literasi -->
-          <div class="landing-gallery-card" onclick="openPhotoModal('foto-perpustakaan-literasi.jpg', '${isEn ? 'Digital Literacy & Library' : 'Ruang Literasi & Perpustakaan Digital'}', '${isEn ? 'Student in school blazer studying reference materials and digital resources independently in the school library.' : 'Siswi berjas almamater SMKN Wonosalam melakukan telaah materi dan literasi digital mandiri di perpustakaan sekolah.'}', '${isEn ? 'Mindful & Research' : 'Mindful & Riset'}')">
-            <div class="landing-gallery-img-wrap">
-              <span class="landing-gallery-badge">${isEn ? 'Digital Library' : 'Perpustakaan Digital'}</span>
-              <img src="foto-perpustakaan-literasi.jpg" alt="Perpustakaan SMKN Wonosalam" loading="lazy" />
-              <div class="landing-gallery-expand-hint">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                ${isEn ? 'Expand HD' : 'Perbesar HD'}
-              </div>
-            </div>
-            <div class="landing-gallery-body">
-              <div class="landing-gallery-title">${isEn ? 'Digital Literacy & Self-Paced Study' : 'Pojok Literasi & Riset Digital Mandiri'}</div>
-              <div class="landing-gallery-desc">
-                ${isEn
-                  ? 'Serene library environment equipped with rich references, nurturing metacognition, critical reading, and learning autonomy (Mindful Learning).'
-                  : 'Fasilitas perpustakaan yang tenang dan kaya referensi, mendorong metakognisi, pembacaan kritis, dan kemandirian belajar (Mindful Learning).'}
-              </div>
-              <div class="landing-gallery-meta">
-                <span>📚 Literasi & Metakognisi</span>
-                <span style="color:#38BDF8; font-weight:600;">${isEn ? 'View HD ↗' : 'Lihat Foto ↗'}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Card 8: Tari Remo Budaya Lokal -->
-          <div class="landing-gallery-card" onclick="openPhotoModal('foto-tari-remo-budaya.jpg', '${isEn ? 'Traditional Remo Dance' : 'Tari Remo di Selasar Gedung Sekolah'}', '${isEn ? 'Preserving East Javanese heritage through traditional Remo dance performances along the school building verandas.' : 'Pelestarian seni tari tradisional Remo khas Jawa Timur di sepanjang selasar koridor gedung sekolah SMKN Wonosalam.'}', '${isEn ? 'Local Heritage' : 'Kearifan Budaya Lokal'}')">
-            <div class="landing-gallery-img-wrap">
-              <span class="landing-gallery-badge">${isEn ? 'Local Heritage' : 'Tari Remo Tradisional'}</span>
-              <img src="foto-tari-remo-budaya.jpg" alt="Tari Remo di SMKN Wonosalam" loading="lazy" />
-              <div class="landing-gallery-expand-hint">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                ${isEn ? 'Expand HD' : 'Perbesar HD'}
-              </div>
-            </div>
-            <div class="landing-gallery-body">
-              <div class="landing-gallery-title">${isEn ? 'East Javanese Remo Cultural Dance' : 'Pelestarian Seni Tari Remo Jawa Timur'}</div>
-              <div class="landing-gallery-desc">
-                ${isEn
-                  ? 'Nurturing Pancasila Student Profile values through regional traditional arts on the breezy corridors of SMKN Wonosalam.'
-                  : 'Penguatan Profil Pelajar Pancasila melalui apresiasi seni dan budaya daerah di selasar gedung sekolah yang sejuk dan asri.'}
-              </div>
-              <div class="landing-gallery-meta">
-                <span>🎭 Kearifan Lokal Jombang</span>
-                <span style="color:#38BDF8; font-weight:600;">${isEn ? 'View HD ↗' : 'Lihat Foto ↗'}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Card 9: Supervisi Guru -->
-          <div class="landing-gallery-card" onclick="openPhotoModal('foto-supervisi-akademik.jpg', '${isEn ? 'Teacher Supervision Session' : 'Supervisi & Dialog Pedagogis Guru'}', '${isEn ? 'Face-to-face academic supervision and teaching module review dialogue between school leaders and teaching staff.' : 'Sesi supervisi akademik dan penelaahan modul ajar tatap muka antara pimpinan sekolah dan guru pengampu.'}', '${isEn ? 'Academic Supervision' : 'Supervisi Mutu'}')">
-            <div class="landing-gallery-img-wrap">
-              <span class="landing-gallery-badge">${isEn ? 'Quality Supervision' : 'Supervisi Mutu'}</span>
-              <img src="foto-supervisi-akademik.jpg" alt="Supervisi Guru SMKN Wonosalam" loading="lazy" />
-              <div class="landing-gallery-expand-hint">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                ${isEn ? 'Expand HD' : 'Perbesar HD'}
-              </div>
-            </div>
-            <div class="landing-gallery-body">
-              <div class="landing-gallery-title">${isEn ? 'Academic Supervision & Module Review' : 'Supervisi Akademik & Telaah Modul'}</div>
-              <div class="landing-gallery-desc">
-                ${isEn
-                  ? 'Continuous constructive dialogue to uphold instructional quality and support teachers in achieving the 47 Deep Learning indicators.'
-                  : 'Dialog pembinaan profesionalisme guru secara berkala untuk memastikan modul ajar memenuhi 47 indikator Deep Learning.'}
-              </div>
-              <div class="landing-gallery-meta">
-                <span>👔 Penjaminan Mutu Ajar</span>
-                <span style="color:#38BDF8; font-weight:600;">${isEn ? 'View HD ↗' : 'Lihat Foto ↗'}</span>
-              </div>
-            </div>
-          </div>
+            `;
+          }).join('')}
         </div>
       </section>
 
@@ -2564,16 +2700,16 @@
               👔
             </div>
             <div>
-              <div class="landing-innovator-name">Sudarso, S.Pd.</div>
-              <div class="landing-innovator-title">Kepala SMK Negeri Wonosalam, Kabupaten Jombang</div>
+              <div class="landing-innovator-name">${escapeHtml(content.innovatorName || 'Sudarso, S.Pd.')}</div>
+              <div class="landing-innovator-title">${escapeHtml(content.innovatorRole || 'Kepala SMK Negeri Wonosalam')}</div>
               
               <blockquote class="landing-innovator-quote">
-                "Supervisi akademik di era Pembelajaran Mendalam (Deep Learning) bukan semata instrumen evaluatif administratif, melainkan jembatan dialog pedagogis yang memuliakan martabat dan menumbuhkan profesionalisme guru untuk melahirkan murid-murid unggul berkarakter."
+                "${escapeHtml(content.innovatorQuote || 'Supervisi akademik di era Pembelajaran Mendalam (Deep Learning) bukan semata instrumen evaluatif administratif, melainkan jembatan dialog pedagogis yang memuliakan martabat dan menumbuhkan profesionalisme guru untuk melahirkan murid-murid unggul berkarakter.')}"
               </blockquote>
 
               <div class="landing-innovator-meta">
-                <span>🏫 <b>Satuan Pendidikan:</b> SMK Negeri Wonosalam (NPSN: 20503412)</span>
-                <span>🏛️ <b>Wilayah:</b> Cabang Dinas Pendidikan Kab. Jombang</span>
+                <span>🏫 <b>Satuan Pendidikan:</b> ${escapeHtml(state.school.school_name || 'SMK Negeri Wonosalam')} (NPSN: ${escapeHtml(state.school.npsn || '20503412')})</span>
+                <span>🏛️ <b>Wilayah:</b> ${escapeHtml(state.school.cabdin || 'Cabang Dinas Pendidikan Kab. Jombang')}</span>
                 <span>🏅 <b>Naskah:</b> Praktik Baik Kepemimpinan GEMPITA 2026</span>
               </div>
             </div>
@@ -2680,6 +2816,7 @@
             <span>Galeri Foto</span>
           </button>
         </div>
+        ${renderActiveModalHTML()}
       </div>
     `;
   }
@@ -3262,6 +3399,154 @@
                 </div>
               </div>
             </form>
+          </div>
+        </div>
+      `;
+    }
+
+    if (state.activeModal === 'cpanel_menu_form') {
+      const isEdit = !!state.cpanelEditingMenuId;
+      const menu = isEdit ? (state.landingMenus || []).find(m => m.id === state.cpanelEditingMenuId) : null;
+      return `
+        <div class="modal-backdrop" onclick="closeModal(event)">
+          <div class="modal-content" style="max-width:540px;" onclick="event.stopPropagation()">
+            <div class="modal-header">
+              <h3>${isEdit ? '✏️ Edit Menu Navigasi' : '➕ Tambah Menu Navigasi Baru'}</h3>
+              <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <form onsubmit="handleSaveMenu(event)">
+              <div class="modal-body">
+                <div class="form-group">
+                  <label>Nama Menu (Bahasa Indonesia)</label>
+                  <input type="text" class="form-control" id="menuInputLabel" placeholder="Contoh: PPDB 2026 atau Kontak" value="${escapeHtml(menu ? menu.label : '')}" required />
+                </div>
+                <div class="form-group">
+                  <label>Nama Menu (English)</label>
+                  <input type="text" class="form-control" id="menuInputLabelEn" placeholder="Example: Admission or Contact" value="${escapeHtml(menu ? (menu.label_en || menu.label) : '')}" />
+                </div>
+                <div class="form-group">
+                  <label>Tipe Aksi Menu</label>
+                  <select class="form-control" id="menuInputType" onchange="handleMenuTypeChange(this.value)">
+                    <option value="scroll" ${!menu || menu.type === 'scroll' ? 'selected' : ''}>⚓ Scroll ke Bagian Halaman (Section)</option>
+                    <option value="link" ${menu && menu.type === 'link' ? 'selected' : ''}>🔗 Buka Link Luar / Website Eksternal</option>
+                    <option value="custom_modal" ${menu && menu.type === 'custom_modal' ? 'selected' : ''}>📄 Tampilkan Pop-up Informasi Khusus</option>
+                  </select>
+                </div>
+
+                <div id="groupMenuTarget" style="display:${!menu || menu.type === 'scroll' ? 'block' : 'none'};">
+                  <div class="form-group">
+                    <label>Pilih Bagian Halaman (Section)</label>
+                    <select class="form-control" id="menuInputTargetSelect">
+                      <option value="hero" ${menu && menu.target === 'hero' ? 'selected' : ''}>Beranda Atas (#hero)</option>
+                      <option value="galeri-section" ${menu && menu.target === 'galeri-section' ? 'selected' : ''}>Galeri Kampus (#galeri-section)</option>
+                      <option value="deep-learning-section" ${menu && menu.target === 'deep-learning-section' ? 'selected' : ''}>Deep Learning (#deep-learning-section)</option>
+                      <option value="ekosistem-section" ${menu && menu.target === 'ekosistem-section' ? 'selected' : ''}>4 Akun / Ekosistem (#ekosistem-section)</option>
+                      <option value="rubrik-section" ${menu && menu.target === 'rubrik-section' ? 'selected' : ''}>Rubrik 47 (#rubrik-section)</option>
+                      <option value="dokumen-section" ${menu && menu.target === 'dokumen-section' ? 'selected' : ''}>Dokumen (#dokumen-section)</option>
+                      <option value="inovator-section" ${menu && menu.target === 'inovator-section' ? 'selected' : ''}>Inovator (#inovator-section)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div id="groupMenuUrl" style="display:${menu && menu.type === 'link' ? 'block' : 'none'};">
+                  <div class="form-group">
+                    <label>Alamat URL Eksternal</label>
+                    <input type="url" class="form-control" id="menuInputUrl" placeholder="https://smknwonosalam.sch.id" value="${escapeHtml(menu && menu.url ? menu.url : '')}" />
+                  </div>
+                </div>
+
+                <div id="groupMenuModal" style="display:${menu && menu.type === 'custom_modal' ? 'block' : 'none'};">
+                  <div class="form-group">
+                    <label>Judul Pop-up Informasi</label>
+                    <input type="text" class="form-control" id="menuInputModalTitle" placeholder="Contoh: Informasi PPDB SMKN Wonosalam" value="${escapeHtml(menu && menu.modalTitle ? menu.modalTitle : '')}" />
+                  </div>
+                  <div class="form-group">
+                    <label>Isi Informasi / Pengumuman</label>
+                    <textarea class="form-control" id="menuInputModalContent" rows="4" placeholder="Tulis isi pengumuman atau info penting di sini...">${escapeHtml(menu && menu.modalContent ? menu.modalContent : '')}</textarea>
+                  </div>
+                </div>
+
+                <div class="form-group" style="margin-top:14px;">
+                  <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input type="checkbox" id="menuInputEnabled" ${!menu || menu.enabled ? 'checked' : ''} />
+                    <b>Aktifkan &amp; tampilkan menu ini di bar navigasi</b>
+                  </label>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal()">Batal</button>
+                <button type="submit" class="btn btn-primary">Simpan Menu</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+    }
+
+    if (state.activeModal === 'cpanel_gallery_form') {
+      return `
+        <div class="modal-backdrop" onclick="closeModal(event)">
+          <div class="modal-content" style="max-width:540px;" onclick="event.stopPropagation()">
+            <div class="modal-header">
+              <h3>📸 Tambah Foto Galeri Kampus</h3>
+              <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <form onsubmit="handleSaveGalleryItem(event)">
+              <div class="modal-body">
+                <div class="form-group">
+                  <label>Judul Foto Dokumentasi</label>
+                  <input type="text" class="form-control" id="galInputTitle" placeholder="Contoh: Gedung Laboratorium Komputer" required />
+                </div>
+                <div class="form-group">
+                  <label>Kategori / Tag</label>
+                  <select class="form-control" id="galInputTag">
+                    <option value="Kampus Utama">Kampus Utama</option>
+                    <option value="Kejuruan ATP">Kejuruan ATP</option>
+                    <option value="Kejuruan Kuliner">Kejuruan Kuliner</option>
+                    <option value="Kejuruan TKR">Kejuruan TKR</option>
+                    <option value="Kejuruan TPM">Kejuruan TPM</option>
+                    <option value="Prestasi &amp; Kegiatan">Prestasi &amp; Kegiatan</option>
+                    <option value="Dokumentasi Resmi">Dokumentasi Resmi</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>File Foto Gambar (Upload atau URL)</label>
+                  <input type="file" class="form-control" id="galInputFile" accept="image/*" onchange="handleGalleryFileUpload(this)" style="margin-bottom:8px;" />
+                  <input type="text" class="form-control" id="galInputUrl" placeholder="Atau ketik nama/link file gambar: gedung-utama-smkn.jpg" required />
+                </div>
+                <div class="form-group">
+                  <label>Deskripsi Foto</label>
+                  <textarea class="form-control" id="galInputDesc" rows="3" placeholder="Jelaskan secara singkat kegiatan atau fasilitas pada foto..." required></textarea>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal()">Batal</button>
+                <button type="submit" class="btn btn-primary">Simpan Foto ke Galeri</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+    }
+
+    if (state.activeModal === 'landing_custom_info' && state.activeCustomModal) {
+      const m = state.activeCustomModal;
+      return `
+        <div class="modal-backdrop" onclick="closeModal(event)">
+          <div class="modal-content" style="max-width:560px;" onclick="event.stopPropagation()">
+            <div class="modal-header">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:1.2rem;">📄</span>
+                <h3 style="margin:0;">${escapeHtml(m.modalTitle || m.label)}</h3>
+              </div>
+              <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="font-size:0.92rem; line-height:1.6; color:var(--text-main); white-space:pre-wrap;">
+              ${escapeHtml(m.modalContent || 'Informasi belum ditambahkan.')}
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" onclick="closeModal()">Tutup</button>
+            </div>
           </div>
         </div>
       `;
@@ -4107,6 +4392,248 @@
       if (window.SitamaDB) {
         window.SitamaDB.disconnectCloud();
       }
+    }
+  };
+
+  // ================= cPanel Web Event Handlers =================
+  window.setCPanelTab = function (tab) {
+    state.cpanelTab = tab;
+    renderApp();
+  };
+
+  window.openAddMenuModal = function () {
+    state.cpanelEditingMenuId = null;
+    state.activeModal = 'cpanel_menu_form';
+    renderApp();
+  };
+
+  window.openEditMenuModal = function (id) {
+    state.cpanelEditingMenuId = id;
+    state.activeModal = 'cpanel_menu_form';
+    renderApp();
+  };
+
+  window.handleMenuTypeChange = function (val) {
+    const gTarget = document.getElementById('groupMenuTarget');
+    const gUrl = document.getElementById('groupMenuUrl');
+    const gModal = document.getElementById('groupMenuModal');
+    if (gTarget) gTarget.style.display = val === 'scroll' ? 'block' : 'none';
+    if (gUrl) gUrl.style.display = val === 'link' ? 'block' : 'none';
+    if (gModal) gModal.style.display = val === 'custom_modal' ? 'block' : 'none';
+  };
+
+  window.handleSaveMenu = function (e) {
+    e.preventDefault();
+    const label = document.getElementById('menuInputLabel').value.trim();
+    const labelEn = document.getElementById('menuInputLabelEn').value.trim() || label;
+    const type = document.getElementById('menuInputType').value;
+    const enabled = document.getElementById('menuInputEnabled').checked;
+
+    let target = 'hero';
+    let url = '';
+    let modalTitle = '';
+    let modalContent = '';
+
+    if (type === 'scroll') {
+      const targetSelect = document.getElementById('menuInputTargetSelect');
+      target = targetSelect ? targetSelect.value : 'hero';
+    } else if (type === 'link') {
+      const urlInput = document.getElementById('menuInputUrl');
+      url = urlInput ? urlInput.value.trim() : '';
+    } else if (type === 'custom_modal') {
+      const titleInput = document.getElementById('menuInputModalTitle');
+      const contentInput = document.getElementById('menuInputModalContent');
+      modalTitle = titleInput ? titleInput.value.trim() || label : label;
+      modalContent = contentInput ? contentInput.value.trim() : '';
+    }
+
+    if (!state.landingMenus) state.landingMenus = [];
+
+    if (state.cpanelEditingMenuId) {
+      const idx = state.landingMenus.findIndex(m => m.id === state.cpanelEditingMenuId);
+      if (idx !== -1) {
+        state.landingMenus[idx] = {
+          ...state.landingMenus[idx],
+          label,
+          label_en: labelEn,
+          type,
+          target,
+          url,
+          modalTitle,
+          modalContent,
+          enabled
+        };
+      }
+    } else {
+      const newMenu = {
+        id: 'menu-' + Date.now(),
+        label,
+        label_en: labelEn,
+        type,
+        target,
+        url,
+        modalTitle,
+        modalContent,
+        enabled
+      };
+      state.landingMenus.push(newMenu);
+    }
+
+    state.activeModal = null;
+    state.cpanelEditingMenuId = null;
+    saveState();
+    logActivity('cPanel Web', `Menyimpan pengaturan menu navigasi '${label}'`);
+    renderApp();
+  };
+
+  window.handleDeleteMenu = function (id) {
+    const item = (state.landingMenus || []).find(m => m.id === id);
+    if (!item) return;
+    if (confirm(`Yakin ingin menghapus menu "${item.label}" dari navigasi?`)) {
+      state.landingMenus = (state.landingMenus || []).filter(m => m.id !== id);
+      saveState();
+      logActivity('cPanel Web', `Menghapus menu navigasi '${item.label}'`);
+      renderApp();
+    }
+  };
+
+  window.handleToggleMenuEnabled = function (id) {
+    const item = (state.landingMenus || []).find(m => m.id === id);
+    if (item) {
+      item.enabled = !item.enabled;
+      saveState();
+      renderApp();
+    }
+  };
+
+  window.handleMoveMenu = function (id, dir) {
+    const menus = state.landingMenus || [];
+    const idx = menus.findIndex(m => m.id === id);
+    if (idx === -1) return;
+    const targetIdx = idx + dir;
+    if (targetIdx < 0 || targetIdx >= menus.length) return;
+    const temp = menus[idx];
+    menus[idx] = menus[targetIdx];
+    menus[targetIdx] = temp;
+    saveState();
+    renderApp();
+  };
+
+  window.handleSaveLandingContent = function (e) {
+    e.preventDefault();
+    if (!state.landingContent) state.landingContent = {};
+    state.landingContent.heroBadge = document.getElementById('cpHeroBadge').value.trim();
+    state.landingContent.heroBadge_en = document.getElementById('cpHeroBadgeEn').value.trim();
+    state.landingContent.heroTitle = document.getElementById('cpHeroTitle').value.trim();
+    state.landingContent.heroTitle_en = document.getElementById('cpHeroTitleEn').value.trim();
+    state.landingContent.heroDesc = document.getElementById('cpHeroDesc').value.trim();
+    state.landingContent.heroDesc_en = document.getElementById('cpHeroDescEn').value.trim();
+    state.landingContent.innovatorName = document.getElementById('cpInnovatorName').value.trim();
+    state.landingContent.innovatorRole = document.getElementById('cpInnovatorRole').value.trim();
+    state.landingContent.innovatorQuote = document.getElementById('cpInnovatorQuote').value.trim();
+
+    saveState();
+    logActivity('cPanel Web', 'Memperbarui teks & banner beranda sekolah');
+    alert('Perubahan teks dan banner beranda berhasil disimpan!');
+    renderApp();
+  };
+
+  window.handleSaveSchoolSettings = function (e) {
+    e.preventDefault();
+    if (!state.school) state.school = {};
+    state.school.school_name = document.getElementById('cpSchoolName').value.trim();
+    state.school.npsn = document.getElementById('cpSchoolNpsn').value.trim();
+    state.school.cabdin = document.getElementById('cpSchoolCabdin').value.trim();
+    state.school.logo = document.getElementById('cpSchoolLogo').value.trim();
+    state.school.address = document.getElementById('cpSchoolAddress').value.trim();
+    state.school.phone = document.getElementById('cpSchoolPhone').value.trim();
+    state.school.email = document.getElementById('cpSchoolEmail').value.trim();
+
+    saveState();
+    logActivity('cPanel Web', 'Memperbarui identitas resmi sekolah');
+    alert('Identitas sekolah berhasil diperbarui!');
+    renderApp();
+  };
+
+  window.openAddGalleryModal = function () {
+    state.activeModal = 'cpanel_gallery_form';
+    renderApp();
+  };
+
+  window.handleGalleryFileUpload = function (input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const urlInput = document.getElementById('galInputUrl');
+        if (urlInput) {
+          urlInput.value = e.target.result;
+        }
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  };
+
+  window.handleSaveGalleryItem = function (e) {
+    e.preventDefault();
+    const title = document.getElementById('galInputTitle').value.trim();
+    const tag = document.getElementById('galInputTag').value;
+    const src = document.getElementById('galInputUrl').value.trim();
+    const desc = document.getElementById('galInputDesc').value.trim();
+
+    if (!src) {
+      alert('Harap masukkan URL foto atau pilih file gambar.');
+      return;
+    }
+
+    if (!state.landingGallery) state.landingGallery = [];
+
+    const newItem = {
+      id: 'gal-' + Date.now(),
+      src,
+      title,
+      title_en: title,
+      desc,
+      desc_en: desc,
+      tag
+    };
+
+    state.landingGallery.push(newItem);
+    state.activeModal = null;
+    saveState();
+    logActivity('cPanel Web', `Menambahkan foto galeri baru '${title}'`);
+    renderApp();
+  };
+
+  window.handleDeleteGalleryItem = function (id) {
+    const item = (state.landingGallery || []).find(g => g.id === id);
+    if (!item) return;
+    if (confirm(`Yakin ingin menghapus foto "${item.title}" dari galeri?`)) {
+      state.landingGallery = (state.landingGallery || []).filter(g => g.id !== id);
+      saveState();
+      logActivity('cPanel Web', `Menghapus foto galeri '${item.title}'`);
+      renderApp();
+    }
+  };
+
+  window.handleResetCPanelToDefault = function () {
+    if (confirm('Kembalikan semua menu navigasi, teks beranda, galeri foto, dan identitas sekolah ke setelan bawaan sistem? Perubahan kustom yang belum dicatat akan direset.')) {
+      state.landingMenus = JSON.parse(JSON.stringify(initialMockData.initialLandingMenus || []));
+      state.landingContent = JSON.parse(JSON.stringify(initialMockData.initialLandingContent || {}));
+      state.landingGallery = JSON.parse(JSON.stringify(initialMockData.initialLandingGallery || []));
+      state.school = JSON.parse(JSON.stringify(initialMockData.school || {}));
+      saveState();
+      logActivity('cPanel Web', 'Mereset konfigurasi web ke setelan bawaan awal (Factory Default)');
+      alert('Konfigurasi web berhasil dikembalikan ke setelan default awal!');
+      renderApp();
+    }
+  };
+
+  window.openLandingCustomModal = function (menuId) {
+    const m = (state.landingMenus || []).find(item => item.id === menuId);
+    if (m) {
+      state.activeCustomModal = m;
+      state.activeModal = 'landing_custom_info';
+      renderApp();
     }
   };
 

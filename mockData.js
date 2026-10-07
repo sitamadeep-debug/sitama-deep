@@ -520,5 +520,41 @@ const initialMockData = {
       ip_address: "192.168.1.2",
       created_at: "2025-09-30 09:00"
     }
+  ],
+
+  // Data Bawaan Web Control Panel (cPanel Web)
+  initialLandingMenus: [
+    { id: 'menu-1', label: 'Beranda', label_en: 'Home', type: 'scroll', target: 'hero', enabled: true },
+    { id: 'menu-2', label: 'Galeri Kampus', label_en: 'Campus Gallery', type: 'scroll', target: 'galeri-section', enabled: true },
+    { id: 'menu-3', label: 'Deep Learning', label_en: 'Deep Learning', type: 'scroll', target: 'deep-learning-section', enabled: true },
+    { id: 'menu-4', label: '4 Akun', label_en: '4 Roles', type: 'scroll', target: 'ekosistem-section', enabled: true },
+    { id: 'menu-5', label: 'Rubrik 47', label_en: 'Rubric 47', type: 'scroll', target: 'rubrik-section', enabled: true },
+    { id: 'menu-6', label: 'Dokumen', label_en: 'Docs', type: 'scroll', target: 'dokumen-section', enabled: true },
+    { id: 'menu-7', label: 'Inovator', label_en: 'Innovator', type: 'scroll', target: 'inovator-section', enabled: true }
+  ],
+  initialLandingContent: {
+    heroBadge: 'Inovasi Praktik Baik GEMPITA 2026 • Cabdin Jombang',
+    heroBadge_en: 'GEMPITA 2026 Best Practice Innovation • Cabdin Jombang',
+    heroTitle: 'Sistem Informasi Telaah Modul Ajar Berbasis Pembelajaran Mendalam',
+    heroTitle_en: 'Deep Learning Based Teaching Module Review Information System',
+    heroDesc: 'Portal Penjaminan Mutu & Supervisi Akademik Berkelanjutan SMK Negeri Wonosalam. Menghadirkan pembelajaran berpusat pada murid yang bermakna, menyenangkan, dan berkesadaran penuh.',
+    heroDesc_en: 'Quality Assurance & Continuous Academic Supervision Portal of SMK Negeri Wonosalam. Delivering mindful, meaningful, and joyful student-centered learning.',
+    innovatorName: 'Sudarso, S.Pd.',
+    innovatorRole: 'Kepala SMK Negeri Wonosalam',
+    innovatorQuote: 'Pembelajaran mendalam bukan sekadar menghafal konten, melainkan membangun kesadaran (Mindful), kebermaknaan hidup (Meaningful), dan kegembiraan belajar (Joyful) bagi seluruh murid kejuruan.',
+    contactPhone: '+62 815-1594-0188',
+    contactEmail: 'smkn.wonosalam.jbg@gmail.com'
+  },
+  initialLandingGallery: [
+    { id: 'gal-1', src: 'gedung-utama-smkn.jpg', title: 'Gedung Utama di Lereng Gn. Anjasmoro', title_en: 'Main Campus at Mount Anjasmoro', desc: 'Kompleks gedung utama dan lapangan upacara SMK Negeri Wonosalam yang asri dan sejuk, menghadirkan lingkungan belajar kondusif.', desc_en: 'The main building complex and ceremonial plaza of SMKN Wonosalam surrounded by lush tropical greenery, offering a serene and focused learning environment.', tag: 'Gedung Utama & Kampus' },
+    { id: 'gal-2', src: 'foto-kampus-lapangan.jpg', title: 'Halaman & Monumen Ikonik Sekolah', title_en: 'Plaza & Iconic School Monument', desc: 'Monumen bertuliskan "SMK NEGERI WONOSALAM" yang menjadi landmark kebanggaan warga sekolah dan panggung kreasi bakat siswa.', desc_en: 'The stone landmark bearing "SMK NEGERI WONOSALAM" as the pride of the school community and a stage for student artistic celebration.', tag: 'Monumen Resmi' },
+    { id: 'gal-3', src: 'foto-paskibra-kampus.jpg', title: 'Kedisiplinan & Bintalsik Peserta Didik', title_en: 'Student Discipline & Character', desc: 'Penanaman karakter integritas, kedisiplinan baris-berbaris, dan pembinaan mental fisik (Bintalsik) yang menjadi ciri khas SMKN Wonosalam.', desc_en: 'Instilling integrity, rigorous discipline, and mental-physical stamina (Bintalsik) through Paskibra and vocational character building.', tag: 'Karakter & Disiplin' },
+    { id: 'gal-4', src: 'foto-bengkel-pemesinan.jpg', title: 'Bengkel Mesin Standar Industri', title_en: 'Industry Standard Workshops', desc: 'Praktik kejuruan vokasi berstandar industri kerja (DUDIKA), membekali siswa keahlian presisi pemesinan dan budaya mutu K3.', desc_en: 'Hands-on vocational practice aligned with industrial standards (DUDIKA), training students in precision machining and safety culture.', tag: 'Praktik Vokasi DUDIKA' },
+    { id: 'gal-5', src: 'foto-studio-smeknews.jpg', title: 'SMEKNEWS Studio & Praktik Kuliner', title_en: 'SMEKNEWS Studio & Culinary Arts', desc: 'Studio podcast digital interaktif sekolah bersinergi dengan konsentrasi keahlian Kuliner/Tata Boga mengasah kemampuan komunikasi publik.', desc_en: 'The school digital podcast studio working in tandem with the Culinary Arts department, honing public speaking and modern creative media skills.', tag: 'Broadcasting & Kuliner' },
+    { id: 'gal-6', src: 'foto-pembelajaran-kolaboratif.jpg', title: 'Aktivitas Belajar Kolaboratif di Kelas', title_en: 'Active Collaborative Learning', desc: 'Implementasi pilar Meaningful & Joyful Learning: siswa bekerja sama memecahkan masalah riil dan mempresentasikan proyek tematik.', desc_en: 'Implementation of Meaningful & Joyful Learning: students working together on real-world problem-solving and thematic presentation projects.', tag: 'Deep Learning di Kelas' },
+    { id: 'gal-7', src: 'foto-perpustakaan-literasi.jpg', title: 'Pojok Literasi & Riset Digital Mandiri', title_en: 'Digital Literacy & Self-Paced Study', desc: 'Fasilitas perpustakaan yang tenang dan kaya referensi, mendorong metakognisi, pembacaan kritis, dan kemandirian belajar (Mindful Learning).', desc_en: 'Serene library environment equipped with rich references, nurturing metacognition, critical reading, and learning autonomy (Mindful Learning).', tag: 'Mindful & Riset' },
+    { id: 'gal-8', src: 'foto-tari-remo-budaya.jpg', title: 'Pelestarian Seni Tari Remo Jawa Timur', title_en: 'East Javanese Remo Cultural Dance', desc: 'Penguatan Profil Pelajar Pancasila melalui apresiasi seni dan budaya daerah di selasar gedung sekolah yang sejuk dan asri.', desc_en: 'Nurturing Pancasila Student Profile values through regional traditional arts on the breezy corridors of SMKN Wonosalam.', tag: 'Kearifan Budaya Lokal' },
+    { id: 'gal-9', src: 'foto-supervisi-akademik.jpg', title: 'Supervisi Akademik & Telaah Modul', title_en: 'Academic Supervision & Module Review', desc: 'Dialog pembinaan profesionalisme guru secara berkala untuk memastikan modul ajar memenuhi 47 indikator Deep Learning.', desc_en: 'Continuous constructive dialogue to uphold instructional quality and support teachers in achieving the 47 Deep Learning indicators.', tag: 'Supervisi Mutu' }
   ]
 };
+

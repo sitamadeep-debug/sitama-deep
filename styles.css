@@ -2631,5 +2631,66 @@ body.modal-open {
   }
 }
 
+/* ==========================================================================
+   CPANEL WEB / SITE & MENU MANAGER STYLES
+   ========================================================================== */
+.cpanel-wrapper {
+  animation: modalFadeIn 0.25s ease-out;
+}
+
+.cpanel-banner {
+  background: linear-gradient(135deg, #0A1128 0%, #101F42 40%, #1E3A8A 100%);
+  border-radius: var(--radius-xl);
+  padding: 24px 28px;
+  color: #FFFFFF;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 25px rgba(10, 17, 40, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cpanel-nav-tabs {
+  display: flex;
+  gap: 8px;
+  background: #F1F5F9;
+  padding: 6px;
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  border: 1px solid var(--border-color);
+  margin-bottom: 20px;
+}
+
+.cpanel-tab-btn {
+  padding: 10px 18px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 0.86rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cpanel-tab-btn:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.cpanel-tab-btn.active {
+  background: #FFFFFF;
+  color: var(--primary-navy);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+
 
 
