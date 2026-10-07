@@ -4,7 +4,7 @@
 
 (function () {
   // Version Guard: Otomatis membersihkan cache localStorage jika versi aplikasi diperbarui, tapi pertahankan kredensial Supabase & sesi user
-  const APP_VERSION = '2026.10.07.v28';
+  const APP_VERSION = '2026.10.07.v29';
   if (localStorage.getItem('sitama_app_version') !== APP_VERSION) {
     const savedSbUrl = localStorage.getItem('sitama_supabase_url');
     const savedSbKey = localStorage.getItem('sitama_supabase_anon_key');
@@ -2218,12 +2218,6 @@
           </ul>
 
           <div class="landing-nav-actions">
-            <!-- Admin cPanel Shortcut Button (if logged in as admin) -->
-            ${currentUser && currentUser.role === 'admin' ? `
-              <button class="landing-btn landing-btn-outline landing-btn-sm" onclick="navigateTo('cpanel')" title="Buka cPanel Web untuk edit menu dan teks" style="border-color:#F59E0B; color:#FBBF24; display:inline-flex; align-items:center; gap:5px; font-weight:700;">
-                ⚙️ cPanel Web
-              </button>
-            ` : ''}
 
             <!-- Language Switcher -->
             <button class="landing-btn landing-btn-outline landing-btn-sm" onclick="toggleLandingLang()" title="Ganti Bahasa">
